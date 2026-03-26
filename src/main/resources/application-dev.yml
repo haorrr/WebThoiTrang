@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fashionshop
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 30000
+  jpa:
+    show-sql: true
+  flyway:
+    clean-disabled: false
+
+logging:
+  level:
+    com.fashionshop: DEBUG
+    org.springframework.security: DEBUG
+    org.flywaydb: INFO

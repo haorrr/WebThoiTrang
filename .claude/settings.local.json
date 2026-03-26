@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash -c 'date +%y%m%d-%H%M')",
+      "Bash(mkdir -p \"c:/Users/PC/Desktop/WebThoiTrang/plans/260326-1534-fashion-ecommerce-springboot/research\")",
+      "Bash(mkdir -p \"c:/Users/PC/Desktop/WebThoiTrang/plans/260326-1534-fashion-ecommerce-springboot/reports\")",
+      "Bash(mkdir -p \"c:/Users/PC/Desktop/WebThoiTrang/plans/260326-1534-fashion-ecommerce-springboot/scout\")",
+      "Bash(mvn wrapper:wrapper -Dmaven=3.9.6)",
+      "Bash(where mvn:*)",
+      "Bash(where mvn.cmd)"
+    ]
+  }
+}
