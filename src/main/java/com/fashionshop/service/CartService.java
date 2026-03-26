@@ -27,6 +27,7 @@ public class CartService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public CartResponse getCart(Long userId) {
         List<CartItem> items = cartItemRepository.findByUserId(userId);
         List<CartItemResponse> responses = items.stream().map(CartItemResponse::from).toList();

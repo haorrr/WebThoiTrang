@@ -26,6 +26,7 @@ public class UserService {
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createdAt", "name", "email");
 
+    @Transactional(readOnly = true)
     public Page<UserResponse> getUsers(String search, String status, String sort,
                                         int page, int size) {
         size = Math.min(size, 50);
@@ -37,6 +38,7 @@ public class UserService {
                 .map(UserResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         User user = findActiveUser(id);
         return UserResponse.from(user);
@@ -77,6 +79,7 @@ public class UserService {
         return UserResponse.from(userRepository.save(user));
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getMyProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));

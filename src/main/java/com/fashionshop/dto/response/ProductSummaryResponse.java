@@ -1,13 +1,17 @@
 package com.fashionshop.dto.response;
 
 import com.fashionshop.entity.Product;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductSummaryResponse {
 
     private Long id;

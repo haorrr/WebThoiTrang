@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAISON — Premium Fashion Store</title>
+  <meta name="description" content="Discover timeless elegance with MAISON's curated collection of premium fashion. Handcrafted luxury clothing, accessories, and more.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="shared.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>M</text></svg>">
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <a href="#" class="navbar__logo">MAISON<span>.</span></a>
+
+    <div class="navbar__links" id="navLinks">
+      <a href="#products">Collection</a>
+      <a href="#story">Our Story</a>
+      <a href="#testimonials">Reviews</a>
+      <a href="#newsletter">Contact</a>
+    </div>
+
+    <div class="navbar__actions" id="navActions">
+      <!-- Injected by api.js renderNavActions() -->
+    </div>
+    <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" style="margin-left:8px; display:none;">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="hero">
+    <div class="hero__bg">
+      <img src="images/hero-bg.png" alt="Luxurious fashion atelier with elegant clothing">
+    </div>
+    <div class="hero__overlay"></div>
+    <div class="container">
+      <div class="hero__content">
+        <div class="hero__label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          New Collection 2026
+        </div>
+        <h1 class="hero__title">Redefine Your <span>Style</span></h1>
+        <p class="hero__subtitle">
+          Discover our curated collection of timeless pieces, where luxury meets contemporary craftsmanship. Each piece tells a story of elegance.
+        </p>
+        <div class="hero__actions">
+          <a href="#products" class="btn btn-primary">
+            Shop Collection
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+          <a href="#story" class="btn btn-secondary">Our Story</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED PRODUCTS ===== -->
+  <section class="products" id="products">
+    <div class="container">
+      <div class="products__header reveal">
+        <span class="section-label">Curated Selection</span>
+        <h2 class="section-title">Featured Pieces</h2>
+        <p class="section-subtitle">
+          Handpicked essentials from our latest collection. Premium materials, timeless design.
+        </p>
+      </div>
+
+      <div class="products__grid" id="homeProductsGrid">
+        <!-- Skeleton Loading -->
+        <div class="skeleton" style="height:360px;border-radius:12px"></div>
+        <div class="skeleton" style="height:360px;border-radius:12px"></div>
+        <div class="skeleton" style="height:360px;border-radius:12px"></div>
+        <div class="skeleton" style="height:360px;border-radius:12px"></div>
+      </div>
+
+      <div style="text-align: center; margin-top: var(--space-2xl);" class="reveal">
+        <a href="products.html" class="btn btn-outline">
+          View All Products
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BRAND STORY ===== -->
+  <section class="brand-story" id="story">
+    <div class="container">
+      <div class="brand-story__grid">
+        <div class="brand-story__image reveal">
+          <img src="images/brand-story.png" alt="Fashion designer's workspace with premium materials">
+        </div>
+        <div class="brand-story__content reveal">
+          <span class="section-label">Our Story</span>
+          <h2 class="section-title">Crafted With Passion</h2>
+          <p class="brand-story__text">
+            At MAISON, we believe fashion is more than clothing — it's an expression of identity. 
+            Founded in 2018, we've dedicated ourselves to sourcing the finest materials and partnering 
+            with skilled artisans who share our vision of timeless elegance.
+          </p>
+          <p class="brand-story__text">
+            Every stitch, every cut, every detail is carefully considered to create pieces 
+            that transcend seasons and trends.
+          </p>
+          <a href="#" class="btn btn-primary">Discover More</a>
+          <div class="brand-story__stats">
+            <div class="stat">
+              <div class="stat__number">12K+</div>
+              <div class="stat__label">Happy Clients</div>
+            </div>
+            <div class="stat">
+              <div class="stat__number">250+</div>
+              <div class="stat__label">Unique Pieces</div>
+            </div>
+            <div class="stat">
+              <div class="stat__number">15</div>
+              <div class="stat__label">Countries</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS ===== -->
+  <section class="testimonials" id="testimonials">
+    <div class="container">
+      <div class="testimonials__header reveal">
+        <span class="section-label">What People Say</span>
+        <h2 class="section-title">Client Reviews</h2>
+        <p class="section-subtitle">
+          Real stories from our valued customers around the world.
+        </p>
+      </div>
+
+      <div class="testimonials__grid">
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card reveal">
+          <div class="testimonial-card__stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-card__text">
+            "The quality of every piece I've purchased from MAISON has been exceptional. 
+            The leather jacket is now my absolute favorite — the craftsmanship is unmatched."
+          </p>
+          <div class="testimonial-card__author">
+            <div class="testimonial-card__avatar">SN</div>
+            <div>
+              <div class="testimonial-card__name">Sarah Nguyen</div>
+              <div class="testimonial-card__role">Fashion Enthusiast</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card reveal">
+          <div class="testimonial-card__stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-card__text">
+            "Finally, a brand that understands luxury without the pretension. 
+            The silk dress drapes beautifully and the attention to detail is remarkable."
+          </p>
+          <div class="testimonial-card__author">
+            <div class="testimonial-card__avatar">MT</div>
+            <div>
+              <div class="testimonial-card__name">Maria Torres</div>
+              <div class="testimonial-card__role">Creative Director</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card reveal">
+          <div class="testimonial-card__stars">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <p class="testimonial-card__text">
+            "I ordered the Firenze tote and it arrived beautifully packaged. 
+            The leather quality is superb. MAISON has become my go-to for premium accessories."
+          </p>
+          <div class="testimonial-card__author">
+            <div class="testimonial-card__avatar">JK</div>
+            <div>
+              <div class="testimonial-card__name">James Kim</div>
+              <div class="testimonial-card__role">Entrepreneur</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+  <section class="newsletter" id="newsletter">
+    <div class="container">
+      <div class="newsletter__inner reveal">
+        <span class="section-label">Stay Connected</span>
+        <h2 class="section-title">Join the MAISON Circle</h2>
+        <p class="section-subtitle" style="margin: 0 auto;">
+          Be the first to know about new arrivals, exclusive offers, and style inspiration delivered straight to your inbox.
+        </p>
+        <form class="newsletter__form" onsubmit="event.preventDefault();">
+          <label for="newsletter-email" class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">Email address</label>
+          <input type="email" id="newsletter-email" class="newsletter__input" placeholder="Enter your email address" required>
+          <button type="submit" class="btn btn-dark">
+            Subscribe
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <div class="footer__brand-name">MAISON<span>.</span></div>
+          <p class="footer__brand-desc">
+            Premium fashion for those who appreciate timeless elegance and exceptional craftsmanship.
+          </p>
+          <div class="footer__social">
+            <a href="#" aria-label="Instagram">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </a>
+            <a href="#" aria-label="Twitter / X">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+              </svg>
+            </a>
+            <a href="#" aria-label="Facebook">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+            </a>
+            <a href="#" aria-label="Pinterest">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="17" x2="12" y2="22"/><path d="M5.2 12a7.8 7.8 0 0 1 15.6 0c0 4.4-3.6 8-8 8"/>
+                <circle cx="12" cy="12" r="4"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer__column">
+          <h4 class="footer__column-title">Shop</h4>
+          <ul>
+            <li><a href="#">New Arrivals</a></li>
+            <li><a href="#">Best Sellers</a></li>
+            <li><a href="#">Clothing</a></li>
+            <li><a href="#">Accessories</a></li>
+            <li><a href="#">Sale</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__column">
+          <h4 class="footer__column-title">Company</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Sustainability</a></li>
+            <li><a href="#">Press</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__column">
+          <h4 class="footer__column-title">Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Shipping</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">Size Guide</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="footer__divider">
+
+      <div class="footer__bottom">
+        <p>&copy; 2026 MAISON. All rights reserved.</p>
+        <div class="footer__bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Render Navigation Actions (Login / User Menu / Cart)
+      renderNavActions();
+
+      // 2. Load Featured Products (Newest 4 products)
+      const grid = document.getElementById('homeProductsGrid');
+      try {
+        // Fetch latest 4 active products
+        const res = await api.products.list({ page: 0, size: 4, sortBy: 'createdAt', sortDir: 'desc', status: 'ACTIVE' });
+        if (res.success && res.data) {
+          const products = res.data.content || [];
+          if (products.length > 0) {
+            grid.innerHTML = products.map(p => {
+              const price = p.salePrice || p.price;
+              const hasDiscount = p.salePrice && p.salePrice < p.price;
+              const imgUrl = (p.images && p.images.find(i => i.primary)?.imageUrl) || 
+                             (p.images && p.images[0]?.imageUrl) || 
+                             'images/product-jacket.png';
+              // Check if new (less than 7 days)
+              const isNew = new Date() - new Date(p.createdAt) < 7 * 24 * 60 * 60 * 1000;
+              
+              return `
+                <div class="product-card reveal" onclick="window.location.href='product-detail.html?id=${p.id}'" style="cursor:pointer">
+                  <div class="product-card__image">
+                    <img src="${imgUrl}" alt="${p.name}" loading="lazy">
+                    ${isNew ? '<span class="product-card__badge">Mới</span>' : ''}
+                    ${p.stock === 0 ? '<span class="product-card__badge" style="background:#DC2626">Hết hàng</span>' : ''}
+                    <button class="product-card__quick-view" onclick="event.stopPropagation();window.location.href='product-detail.html?id=${p.id}'">Xem chi tiết</button>
+                  </div>
+                  <div class="product-card__info">
+                    <span class="product-card__category">${p.category && p.category.name ? p.category.name : ''}</span>
+                    <h3 class="product-card__name">${p.name}</h3>
+                    <div class="product-card__price">
+                      <span class="current">${formatVND(price)}</span>
+                      ${hasDiscount ? `<span class="original">${formatVND(p.price)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            
+            // Re-trigger scroll reveal for new dynamic elements
+            setTimeout(() => {
+              grid.querySelectorAll('.reveal').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), i * 100);
+              });
+            }, 100);
+          } else {
+             grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-text-muted)">Chưa có sản phẩm nào.</p>';
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load products:', err);
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#DC2626">Không thể tải sản phẩm. Vui lòng thử lại sau.</p>';
+      }
+    });
+
+    // Handle Hamburger menu specifically for the homepage since we re-ordered DOM a bit
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('active');
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+  </script>
+</body>
+</html>

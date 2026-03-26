@@ -38,6 +38,7 @@ public class ProductService {
 
     private static final Set<String> ALLOWED_SORT = Set.of("price", "createdAt", "name", "stock");
 
+    @Transactional(readOnly = true)
     public Page<ProductSummaryResponse> getProducts(String search, Long categoryId,
                                                      BigDecimal minPrice, BigDecimal maxPrice,
                                                      String status, String sort, String dir,
@@ -53,6 +54,7 @@ public class ProductService {
     }
 
     @Cacheable(value = "products", key = "#id")
+    @Transactional(readOnly = true)
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
@@ -60,6 +62,7 @@ public class ProductService {
     }
 
     @Cacheable(value = "products", key = "'slug:' + #slug")
+    @Transactional(readOnly = true)
     public ProductResponse getProductBySlug(String slug) {
         Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "slug", slug));

@@ -27,6 +27,7 @@ public class CategoryService {
     private final ProductRepository productRepository;
 
     @Cacheable(value = "categories", key = "'tree'")
+    @Transactional(readOnly = true)
     public List<CategoryTreeResponse> getCategoryTree() {
         List<Category> all = categoryRepository.findAllActive();
 
@@ -59,6 +60,7 @@ public class CategoryService {
         return roots;
     }
 
+    @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(Long id) {
         return CategoryResponse.from(findCategory(id));
     }

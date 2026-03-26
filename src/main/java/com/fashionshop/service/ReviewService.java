@@ -26,6 +26,7 @@ public class ReviewService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public Page<ReviewResponse> getProductReviews(Long productId, boolean approvedOnly, int page, int size) {
         PageRequest pr = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (approvedOnly) {
@@ -35,11 +36,13 @@ public class ReviewService {
         return reviewRepository.findByProductId(productId, pr).map(ReviewResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public Page<ReviewResponse> getUserReviews(Long userId, int page, int size) {
         PageRequest pr = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         return reviewRepository.findByUserId(userId, pr).map(ReviewResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public Page<ReviewResponse> getAllReviews(String status, int page, int size) {
         PageRequest pr = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (status != null) {

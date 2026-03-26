@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài khoản — MAISON</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar__logo">MAISON<span>.</span></a>
+  <div class="navbar__links" id="navLinks">
+    <a href="products.html">Bộ sưu tập</a>
+    <a href="orders.html">Đơn hàng</a>
+  </div>
+  <div class="navbar__actions" id="navActions"></div>
+  <button class="navbar__hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <span class="section-label">Cá nhân</span>
+    <h1>Tài khoản của tôi</h1>
+  </div>
+</div>
+
+<div class="container page-content">
+  <div class="user-page-layout">
+    <!-- Sidebar -->
+    <div class="user-sidebar">
+      <div class="user-sidebar__card">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div class="user-name" id="userName">Đang tải...</div>
+        <div class="user-email" id="userEmail"></div>
+      </div>
+      <nav class="user-menu">
+        <a href="profile.html" class="active">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Thông tin cá nhân
+        </a>
+        <a href="orders.html">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Đơn hàng của tôi
+        </a>
+        <a href="#" onclick="handleLogout()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Đăng xuất
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div>
+      <div class="content-card">
+        <h2 class="content-card__title">Thông tin cá nhân</h2>
+        <div id="alertBox"></div>
+        <form id="profileForm">
+          <div class="form-group">
+            <label class="form-label">Họ và tên</label>
+            <input class="form-input" type="text" id="name" placeholder="Họ và tên" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" id="email" disabled style="opacity:0.6;cursor:not-allowed">
+            <p class="form-hint">Email không thể thay đổi</p>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:0.5rem">
+            <button type="submit" class="btn btn-primary" id="saveBtn">Lưu thay đổi</button>
+            <button type="button" class="btn btn-outline" onclick="loadProfile()">Hủy</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Account Info -->
+      <div class="content-card">
+        <h2 class="content-card__title">Thông tin tài khoản</h2>
+        <div id="accountInfo"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__bottom"><p>&copy; 2026 MAISON. All rights reserved.</p></div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (!Auth.isLoggedIn()) { window.location.href = 'login.html'; return; }
+  renderNavActions();
+  loadProfile();
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+});
+
+async function loadProfile() {
+  try {
+    const res = await api.users.me();
+    if (res.success && res.data) {
+      const u = res.data;
+      Auth.save(null, null, u);
+      // Update sidebar
+      const initials = u.name ? u.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) : 'U';
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('userName').textContent = u.name || '';
+      document.getElementById('userEmail').textContent = u.email || '';
+      // Form
+      document.getElementById('name').value = u.name || '';
+      document.getElementById('email').value = u.email || '';
+      // Account info
+      document.getElementById('accountInfo').innerHTML = `
+        <div class="summary-row" style="padding:8px 0;border-bottom:1px solid var(--color-border)"><span style="color:var(--color-text-muted)">Vai trò</span><span>${u.role === 'ROLE_ADMIN' ? '<span class="badge badge-warning">Admin</span>' : '<span class="badge badge-success">Thành viên</span>'}</span></div>
+        <div class="summary-row" style="padding:8px 0;border-bottom:1px solid var(--color-border)"><span style="color:var(--color-text-muted)">Trạng thái</span><span>${getStatusBadge(u.status)}</span></div>
+        <div class="summary-row" style="padding:8px 0;border-bottom:1px solid var(--color-border)"><span style="color:var(--color-text-muted)">Đăng nhập qua</span><span>${u.provider}</span></div>
+        <div class="summary-row" style="padding:8px 0"><span style="color:var(--color-text-muted)">Ngày tạo</span><span>${formatDate(u.createdAt)}</span></div>
+      `;
+    }
+  } catch {}
+}
+
+document.getElementById('profileForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('saveBtn');
+  const alertBox = document.getElementById('alertBox');
+  alertBox.innerHTML = '';
+  setLoading(btn, true);
+  try {
+    const res = await api.users.updateMe({ name: document.getElementById('name').value.trim() });
+    if (res.success) {
+      alertBox.innerHTML = `<div class="alert alert-success">Cập nhật thành công!</div>`;
+      Auth.save(null, null, res.data);
+      loadProfile();
+    }
+  } catch (err) {
+    alertBox.innerHTML = `<div class="alert alert-error">${err.message || 'Cập nhật thất bại'}</div>`;
+  }
+  setLoading(btn, false);
+});
+</script>
+</body>
+</html>

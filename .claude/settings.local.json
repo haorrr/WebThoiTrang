@@ -13,7 +13,18 @@
       "Bash(git add:*)",
       "Read(//c/Users/PC/Desktop/WebThoiTrang/**)",
       "Bash(awk 'END {print \"\"\"\"FILES:\"\"\"\"NR}')",
-      "Read(//c/Users/PC/Desktop/WebThoiTrang/{\n  if \\($0 ~ /.\\(md|txt\\)$/\\) print \"\"\"\"\"\"\"\"docs:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /test|spec/\\) print \"\"\"\"\"\"\"\"test:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /.claude/\\(skills|agents|commands|workflows\\)/\\) print \"\"\"\"\"\"\"\"config:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /package/.json|yarn/.lock|pnpm-lock/\\) print \"\"\"\"\"\"\"\"deps:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /.github|/.gitlab|ci/.yml/**)"
+      "Read(//c/Users/PC/Desktop/WebThoiTrang/{\n  if \\($0 ~ /.\\(md|txt\\)$/\\) print \"\"\"\"\"\"\"\"docs:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /test|spec/\\) print \"\"\"\"\"\"\"\"test:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /.claude/\\(skills|agents|commands|workflows\\)/\\) print \"\"\"\"\"\"\"\"config:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /package/.json|yarn/.lock|pnpm-lock/\\) print \"\"\"\"\"\"\"\"deps:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /.github|/.gitlab|ci/.yml/**)",
+      "Bash(xargs wc:*)",
+      "Bash(bash -c 'date +%y%m%d')",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"fashion ecommerce store elegant luxury modern\" --design-system -p \"FashionShop\")",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"fashion ecommerce landing hero testimonial\" --domain landing -n 5)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"ecommerce fashion luxury\" --domain landing -n 3)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"animation scroll\" --domain ux -n 3)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"fashion ecommerce luxury clothing store elegant\" --design-system -p \"FashionShop\")",
+      "Bash(py --version)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"fashion ecommerce luxury clothing store elegant\" --design-system -p \"FashionShop\")",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"landing hero cta social proof\" --domain landing -n 3)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"layout responsive accessibility\" --stack html-tailwind)"
     ]
   }
 }

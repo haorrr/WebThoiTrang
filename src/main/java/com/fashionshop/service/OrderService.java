@@ -106,6 +106,7 @@ public class OrderService {
         return OrderResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderResponse> getOrders(Long userId, String status, int page, int size, String sort) {
         String sortField = ALLOWED_SORT.contains(sort) ? sort : "createdAt";
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
@@ -120,6 +121,7 @@ public class OrderService {
         return orders.map(OrderResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(String status, int page, int size, String sort) {
         String sortField = ALLOWED_SORT.contains(sort) ? sort : "createdAt";
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortField));
@@ -131,6 +133,7 @@ public class OrderService {
         return orderRepository.findAll(pageRequest).map(OrderResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long userId, Long orderId, boolean isAdmin) {
         Order order;
         if (isAdmin) {

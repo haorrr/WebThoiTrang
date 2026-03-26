@@ -43,6 +43,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // OAuth2 endpoints
                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                // Frontend files & Public assets
+                .requestMatchers(
+                    "/", "/index.html", "/*.html", "/admin/*.html", "/oauth2/*.html",
+                    "/*.css", "/*.js", "/css/**", "/js/**", "/images/**", "/favicon.ico"
+                ).permitAll()
                 // Public product/category browsing
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
@@ -57,9 +62,20 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login.html")
                 .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
                 .successHandler(oAuth2SuccessHandler)
                 .failureHandler(oAuth2FailureHandler)
+            )
+            .exceptionHandling(ex -> ex
+                .defaultAuthenticationEntryPointFor(
+                    (request, response, authException) -> {
+                        response.setContentType("application/json");
+                        response.setStatus(401);
+                        response.getWriter().write("{\"success\":false,\"message\":\"Unauthorized. Please login again.\"}");
+                    },
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/**")
+                )
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
