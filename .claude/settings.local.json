@@ -7,7 +7,13 @@
       "Bash(mkdir -p \"c:/Users/PC/Desktop/WebThoiTrang/plans/260326-1534-fashion-ecommerce-springboot/scout\")",
       "Bash(mvn wrapper:wrapper -Dmaven=3.9.6)",
       "Bash(where mvn:*)",
-      "Bash(where mvn.cmd)"
+      "Bash(where mvn.cmd)",
+      "Bash(\"C:\\\\Users\\\\PC\\\\Downloads\\\\apache-maven-3.9.14-bin\\\\apache-maven-3.9.14\\\\bin\\\\mvn.cmd\" compile:*)",
+      "Bash(grep -v \"import\\\\|//\")",
+      "Bash(git add:*)",
+      "Read(//c/Users/PC/Desktop/WebThoiTrang/**)",
+      "Bash(awk 'END {print \"\"\"\"FILES:\"\"\"\"NR}')",
+      "Read(//c/Users/PC/Desktop/WebThoiTrang/{\n  if \\($0 ~ /.\\(md|txt\\)$/\\) print \"\"\"\"\"\"\"\"docs:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /test|spec/\\) print \"\"\"\"\"\"\"\"test:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /.claude/\\(skills|agents|commands|workflows\\)/\\) print \"\"\"\"\"\"\"\"config:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /package/.json|yarn/.lock|pnpm-lock/\\) print \"\"\"\"\"\"\"\"deps:\"\"\"\"\"\"\"\"$0\n  else if \\($0 ~ /.github|/.gitlab|ci/.yml/**)"
     ]
   }
 }

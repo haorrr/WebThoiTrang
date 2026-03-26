@@ -41,20 +41,8 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:}
-            client-secret: ${GOOGLE_CLIENT_SECRET:}
-            scope: email, profile
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-          github:
-            client-id: ${GITHUB_CLIENT_ID:}
-            client-secret: ${GITHUB_CLIENT_SECRET:}
-            scope: user:email, read:user
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+  # OAuth2 client-id/secret are loaded conditionally via OAuth2Config bean
+  # (allows app to start without OAuth2 credentials configured)
 
 server:
   port: ${PORT:8080}

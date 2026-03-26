@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -23,4 +24,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
            "(LOWER(u.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<User> searchActive(String search, Pageable pageable);
+
+    long countByDeletedAtIsNull();
+
+    long countByDeletedAtIsNullAndStatus(User.Status status);
+
+    long countByDeletedAtIsNullAndCreatedAtAfter(LocalDateTime after);
 }
