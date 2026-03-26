@@ -10,6 +10,8 @@ import com.fashionshop.repository.CategoryRepository;
 import com.fashionshop.repository.ProductRepository;
 import com.fashionshop.util.SlugUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
+    @Cacheable(value = "categories", key = "'tree'")
     public List<CategoryTreeResponse> getCategoryTree() {
         List<Category> all = categoryRepository.findAllActive();
 
@@ -60,6 +63,7 @@ public class CategoryService {
         return CategoryResponse.from(findCategory(id));
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public CategoryResponse createCategory(CategoryRequest req) {
         String slug = SlugUtil.toUniqueSlug(req.getName(), categoryRepository::existsBySlug);
@@ -80,6 +84,7 @@ public class CategoryService {
         return CategoryResponse.from(categoryRepository.save(category));
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public CategoryResponse updateCategory(Long id, CategoryRequest req) {
         Category category = findCategory(id);
@@ -101,6 +106,7 @@ public class CategoryService {
         return CategoryResponse.from(categoryRepository.save(category));
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public void deleteCategory(Long id) {
         Category category = findCategory(id);
@@ -111,6 +117,7 @@ public class CategoryService {
         categoryRepository.save(category);
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public CategoryResponse toggleStatus(Long id) {
         Category category = findCategory(id);

@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 public class ProductController {
 
     private final ProductService productService;
+    private final com.fashionshop.service.GeminiService geminiService;
 
     @GetMapping
     @Operation(summary = "List products with filters (public)")
@@ -104,5 +105,19 @@ public class ProductController {
             @PathVariable Long id, @PathVariable Long imageId) {
         productService.deleteImage(id, imageId);
         return ResponseEntity.ok(ApiResponse.ok("Image deleted", null));
+    }
+
+    @PostMapping("/{id}/ai-description")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Generate AI description for product (Admin)")
+    public ResponseEntity<ApiResponse<ProductResponse>> generateAiDescription(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "") String features) {
+        ProductResponse product = productService.getProductById(id);
+        String categoryName = product.getCategory() != null ? product.getCategory().getName() : "Thời trang";
+        String description = geminiService.generateProductDescription(
+                product.getName(), categoryName, features);
+        return ResponseEntity.ok(ApiResponse.ok("AI description generated",
+                productService.updateAiDescription(id, description)));
     }
 }

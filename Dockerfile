@@ -4,7 +4,7 @@
 # Stage 2: Run with minimal JRE
 # ============================================================
 
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM eclipse-temurin:22-jdk-alpine AS build
 WORKDIR /app
 
 # Copy Maven wrapper
@@ -19,7 +19,7 @@ COPY src ./src
 RUN ./mvnw package -DskipTests -B
 
 # ============================================================
-FROM eclipse-temurin:21-jre-alpine AS runtime
+FROM eclipse-temurin:22-jre-alpine AS runtime
 WORKDIR /app
 
 # Security: run as non-root user

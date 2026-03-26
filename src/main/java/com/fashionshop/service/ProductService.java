@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,18 +52,21 @@ public class ProductService {
                 .map(ProductSummaryResponse::from);
     }
 
+    @Cacheable(value = "products", key = "#id")
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
         return ProductResponse.from(product);
     }
 
+    @Cacheable(value = "products", key = "'slug:' + #slug")
     public ProductResponse getProductBySlug(String slug) {
         Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "slug", slug));
         return ProductResponse.from(product);
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductResponse createProduct(ProductRequest req) {
         String slug = SlugUtil.toUniqueSlug(req.getName(), productRepository::existsBySlug);
@@ -85,6 +90,7 @@ public class ProductService {
         return ProductResponse.from(productRepository.save(product));
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest req) {
         Product product = findProduct(id);
@@ -106,6 +112,7 @@ public class ProductService {
         return ProductResponse.from(productRepository.save(product));
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public void deleteProduct(Long id) {
         Product product = findProduct(id);
@@ -113,6 +120,7 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductResponse toggleStatus(Long id) {
         Product product = findProduct(id);
@@ -152,6 +160,7 @@ public class ProductService {
         productImageRepository.delete(image);
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductResponse updateAiDescription(Long id, String aiDescription) {
         Product product = findProduct(id);
