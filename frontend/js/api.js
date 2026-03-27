@@ -103,6 +103,7 @@ const api = {
       const token = Auth.getAccess();
       return fetch(`${API_BASE}/products/${id}/images`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData }).then(r => r.json());
     },
+    addImageByUrl: (id, imageUrl, isPrimary = false) => apiFetch(`/products/${id}/images/url?imageUrl=${encodeURIComponent(imageUrl)}&isPrimary=${isPrimary}`, { method: 'POST' }),
     deleteImage: (id, imageId) => apiFetch(`/products/${id}/images/${imageId}`, { method: 'DELETE' }),
     generateAiDescription: (id) => apiFetch(`/products/${id}/ai-description`, { method: 'POST' }),
   },

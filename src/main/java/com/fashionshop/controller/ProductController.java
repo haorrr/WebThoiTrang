@@ -98,6 +98,17 @@ public class ProductController {
                 .body(ApiResponse.created("Image uploaded", productService.addImage(id, file, isPrimary)));
     }
 
+    @PostMapping("/{id}/images/url")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Add product image by URL (Admin)")
+    public ResponseEntity<ApiResponse<ProductResponse>> addImageByUrl(
+            @PathVariable Long id,
+            @RequestParam String imageUrl,
+            @RequestParam(defaultValue = "false") boolean isPrimary) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created("Image added", productService.addImageByUrl(id, imageUrl, isPrimary)));
+    }
+
     @DeleteMapping("/{id}/images/{imageId}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete product image (Admin)")

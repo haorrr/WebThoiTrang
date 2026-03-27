@@ -155,6 +155,25 @@ public class ProductService {
     }
 
     @Transactional
+    public ProductResponse addImageByUrl(Long productId, String imageUrl, boolean isPrimary) {
+        Product product = findProduct(productId);
+
+        if (isPrimary) {
+            productImageRepository.clearPrimaryForProduct(productId);
+        }
+
+        ProductImage image = ProductImage.builder()
+                .product(product)
+                .imageUrl(imageUrl)
+                .isPrimary(isPrimary || product.getImages().isEmpty())
+                .sortOrder(product.getImages().size())
+                .build();
+        productImageRepository.save(image);
+
+        return getProductById(productId);
+    }
+
+    @Transactional
     public void deleteImage(Long productId, Long imageId) {
         ProductImage image = productImageRepository.findByIdAndProductId(imageId, productId)
                 .orElseThrow(() -> new ResourceNotFoundException("ProductImage", imageId));

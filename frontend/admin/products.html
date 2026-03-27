@@ -110,6 +110,37 @@
         <label class="form-label">Mô tả</label>
         <textarea class="form-textarea" id="pDescription" placeholder="Mô tả sản phẩm..." rows="3"></textarea>
       </div>
+
+      <!-- Image Section -->
+      <div class="form-group" id="imageSection">
+        <label class="form-label">Ảnh sản phẩm</label>
+        <div id="existingImages" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button type="button" class="btn btn-xs btn-outline" id="tabUpload" onclick="switchImgTab('upload')" style="font-size:0.8rem">Upload file</button>
+          <button type="button" class="btn btn-xs btn-outline" id="tabUrl" onclick="switchImgTab('url')" style="font-size:0.8rem">Dùng link URL</button>
+        </div>
+        <div id="tabUploadPanel">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="file" id="imgFile" accept="image/*" class="form-input" style="flex:1;font-size:0.8rem">
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;white-space:nowrap">
+              <input type="checkbox" id="imgFilePrimary"> Ảnh chính
+            </label>
+            <button type="button" class="btn btn-sm btn-outline" id="uploadFileBtn" onclick="uploadImageFile()">Tải lên</button>
+          </div>
+        </div>
+        <div id="tabUrlPanel" style="display:none">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="text" id="imgUrl" class="form-input" placeholder="https://example.com/image.jpg" style="flex:1;font-size:0.8rem">
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;white-space:nowrap">
+              <input type="checkbox" id="imgUrlPrimary"> Ảnh chính
+            </label>
+            <button type="button" class="btn btn-sm btn-outline" id="addUrlBtn" onclick="addImageUrl()">Thêm</button>
+          </div>
+          <div id="urlPreview" style="margin-top:6px"></div>
+        </div>
+        <p id="imgNote" style="font-size:0.75rem;color:var(--color-text-muted);margin-top:6px">Lưu sản phẩm trước, sau đó mới có thể thêm ảnh.</p>
+      </div>
+
       <input type="hidden" id="pId">
     </form>
     <div class="modal__footer">
@@ -230,8 +261,104 @@ function openProductModal(id = null) {
   document.getElementById('productForm').reset();
   document.getElementById('pId').value = id || '';
   document.getElementById('modalAlertBox').innerHTML = '';
+  document.getElementById('existingImages').innerHTML = '';
+  document.getElementById('urlPreview').innerHTML = '';
+  document.getElementById('imgNote').style.display = id ? 'none' : '';
+  document.getElementById('tabUploadPanel').style.display = id ? '' : 'none';
+  document.getElementById('tabUrlPanel').style.display = 'none';
+  document.getElementById('tabUpload').style.display = id ? '' : 'none';
+  document.getElementById('tabUrl').style.display = id ? '' : 'none';
+  switchImgTab('upload');
   document.getElementById('productModal').classList.add('open');
 }
+
+function switchImgTab(tab) {
+  document.getElementById('tabUploadPanel').style.display = tab === 'upload' ? '' : 'none';
+  document.getElementById('tabUrlPanel').style.display = tab === 'url' ? '' : 'none';
+  document.getElementById('tabUpload').classList.toggle('btn-primary', tab === 'upload');
+  document.getElementById('tabUpload').classList.toggle('btn-outline', tab !== 'upload');
+  document.getElementById('tabUrl').classList.toggle('btn-primary', tab === 'url');
+  document.getElementById('tabUrl').classList.toggle('btn-outline', tab !== 'url');
+}
+
+function renderExistingImages(images) {
+  const pid = document.getElementById('pId').value;
+  const container = document.getElementById('existingImages');
+  if (!images || images.length === 0) { container.innerHTML = '<span style="font-size:0.78rem;color:var(--color-text-muted)">Chưa có ảnh</span>'; return; }
+  container.innerHTML = images.map(img => `
+    <div style="position:relative;display:inline-block">
+      <img src="${img.imageUrl}" style="width:72px;height:88px;object-fit:cover;border-radius:6px;border:2px solid ${img.isPrimary ? 'var(--color-cta)' : 'var(--color-border)'}">
+      ${img.isPrimary ? '<span style="position:absolute;top:2px;left:2px;background:var(--color-cta);color:#fff;font-size:9px;padding:1px 4px;border-radius:3px">Chính</span>' : ''}
+      <button type="button" onclick="deleteImg(${pid}, ${img.id})" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#DC2626;color:#fff;border:none;cursor:pointer;font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+  `).join('');
+}
+
+async function deleteImg(productId, imageId) {
+  if (!confirm('Xóa ảnh này?')) return;
+  try {
+    await api.products.deleteImage(productId, imageId);
+    showToast('Đã xóa ảnh');
+    const res = await api.products.get(productId);
+    if (res.success) renderExistingImages(res.data.images);
+  } catch { showToast('Không thể xóa ảnh', 'error'); }
+}
+
+async function uploadImageFile() {
+  const pid = document.getElementById('pId').value;
+  const file = document.getElementById('imgFile').files[0];
+  if (!file) { showToast('Chọn file ảnh', 'error'); return; }
+  const isPrimary = document.getElementById('imgFilePrimary').checked;
+  const btn = document.getElementById('uploadFileBtn');
+  setLoading(btn, true);
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('isPrimary', isPrimary);
+    const res = await api.products.uploadImage(pid, fd);
+    if (res.success) {
+      showToast('Đã tải ảnh lên');
+      document.getElementById('imgFile').value = '';
+      renderExistingImages(res.data.images);
+    }
+  } catch (err) { showToast(err.message || 'Lỗi tải ảnh', 'error'); }
+  setLoading(btn, false);
+}
+
+async function addImageUrl() {
+  const pid = document.getElementById('pId').value;
+  const url = document.getElementById('imgUrl').value.trim();
+  if (!url) { showToast('Nhập URL ảnh', 'error'); return; }
+  const isPrimary = document.getElementById('imgUrlPrimary').checked;
+  const btn = document.getElementById('addUrlBtn');
+  setLoading(btn, true);
+  try {
+    const res = await api.products.addImageByUrl(pid, url, isPrimary);
+    if (res.success) {
+      showToast('Đã thêm ảnh');
+      document.getElementById('imgUrl').value = '';
+      document.getElementById('urlPreview').innerHTML = '';
+      renderExistingImages(res.data.images);
+    }
+  } catch (err) { showToast(err.message || 'Lỗi thêm ảnh', 'error'); }
+  setLoading(btn, false);
+}
+
+// Preview URL image as user types
+document.addEventListener('DOMContentLoaded', () => {
+  // imgUrl preview (set up after DOM)
+  setTimeout(() => {
+    const imgUrlInput = document.getElementById('imgUrl');
+    if (imgUrlInput) {
+      imgUrlInput.addEventListener('input', () => {
+        const url = imgUrlInput.value.trim();
+        const preview = document.getElementById('urlPreview');
+        if (url) preview.innerHTML = `<img src="${url}" onerror="this.style.display='none'" onload="this.style.display=''" style="height:80px;border-radius:6px;object-fit:cover;display:none">`;
+        else preview.innerHTML = '';
+      });
+    }
+  }, 0);
+});
 
 async function editProduct(id) {
   openProductModal(id);
@@ -246,6 +373,7 @@ async function editProduct(id) {
       document.getElementById('pStatus').value = p.status;
       document.getElementById('pDescription').value = p.description || '';
       document.getElementById('pCategory').value = p.category?.id || '';
+      renderExistingImages(p.images);
     }
   } catch {}
 }
@@ -274,9 +402,17 @@ async function saveProduct() {
   try {
     const res = id ? await api.products.update(id, data) : await api.products.create(data);
     if (res.success) {
-      closeProductModal();
-      showToast(id ? 'Đã cập nhật sản phẩm' : 'Đã thêm sản phẩm mới');
-      loadProducts();
+      if (!id) {
+        // New product: reopen modal with image section
+        closeProductModal();
+        showToast('Đã thêm sản phẩm — có thể thêm ảnh bên dưới');
+        loadProducts();
+        await editProduct(res.data.id);
+      } else {
+        closeProductModal();
+        showToast('Đã cập nhật sản phẩm');
+        loadProducts();
+      }
     }
   } catch (err) {
     alertBox.innerHTML = `<div class="alert alert-error">${err.message || 'Có lỗi xảy ra'}</div>`;
