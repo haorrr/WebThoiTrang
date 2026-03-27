@@ -330,8 +330,9 @@
             grid.innerHTML = products.map(p => {
               const price = p.salePrice || p.price;
               const hasDiscount = p.salePrice && p.salePrice < p.price;
-              const imgUrl = (p.images && p.images.find(i => i.primary)?.imageUrl) || 
-                             (p.images && p.images[0]?.imageUrl) || 
+              const imgUrl = p.primaryImageUrl ||
+                             (p.images && p.images.find(i => i.primary || i.isPrimary)?.imageUrl) ||
+                             (p.images && p.images[0]?.imageUrl) ||
                              'images/product-jacket.png';
               // Check if new (less than 7 days)
               const isNew = new Date() - new Date(p.createdAt) < 7 * 24 * 60 * 60 * 1000;
@@ -345,7 +346,7 @@
                     <button class="product-card__quick-view" onclick="event.stopPropagation();window.location.href='product-detail.html?id=${p.id}'">Xem chi tiết</button>
                   </div>
                   <div class="product-card__info">
-                    <span class="product-card__category">${p.category && p.category.name ? p.category.name : ''}</span>
+                    <span class="product-card__category">${p.categoryName || (p.category && p.category.name) || ''}</span>
                     <h3 class="product-card__name">${p.name}</h3>
                     <div class="product-card__price">
                       <span class="current">${formatVND(price)}</span>
