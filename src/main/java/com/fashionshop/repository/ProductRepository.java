@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +25,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Optional<Product> findBySlug(String slug);
 
     boolean existsByCategoryId(Long categoryId);
+
+    @Modifying
+    @Query("UPDATE Product p SET p.status = :status WHERE p.category.id = :categoryId AND p.deletedAt IS NULL")
+    void updateStatusByCategoryId(@org.springframework.data.repository.query.Param("categoryId") Long categoryId,
+                                  @org.springframework.data.repository.query.Param("status") Product.Status status);
 
     long countByDeletedAtIsNull();
 

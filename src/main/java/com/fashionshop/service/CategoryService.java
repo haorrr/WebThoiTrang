@@ -123,10 +123,17 @@ public class CategoryService {
     @Transactional
     public CategoryResponse toggleStatus(Long id) {
         Category category = findCategory(id);
-        category.setStatus(category.getStatus() == Category.Status.ACTIVE
+        Category.Status newStatus = category.getStatus() == Category.Status.ACTIVE
                 ? Category.Status.INACTIVE
-                : Category.Status.ACTIVE);
-        return CategoryResponse.from(categoryRepository.save(category));
+                : Category.Status.ACTIVE;
+        category.setStatus(newStatus);
+        categoryRepository.save(category);
+        // Cascade status change to all products in this category
+        productRepository.updateStatusByCategoryId(id,
+                newStatus == Category.Status.ACTIVE
+                        ? com.fashionshop.entity.Product.Status.ACTIVE
+                        : com.fashionshop.entity.Product.Status.INACTIVE);
+        return CategoryResponse.from(category);
     }
 
     private Category findCategory(Long id) {

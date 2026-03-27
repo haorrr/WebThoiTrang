@@ -102,6 +102,7 @@ function renderTable() {
       <td><div class="actions">
         <button class="btn btn-xs btn-outline" onclick="editCat(${c.id})">Sửa</button>
         <button class="btn btn-xs btn-outline" onclick="toggleCat(${c.id})">${c.status === 'INACTIVE' ? 'Bật' : 'Ẩn'}</button>
+        <button class="btn btn-xs btn-danger" onclick="deleteCat(${c.id}, '${c.name.replace(/'/g, "\\'")}', ${c.productCount || 0})">Xóa</button>
       </div></td>
     </tr>
   `).join('') || `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--color-text-muted)">Chưa có danh mục nào</td></tr>`;
@@ -158,6 +159,19 @@ async function saveCat() {
 async function toggleCat(id) {
   try { await api.categories.toggleStatus(id); showToast('Đã cập nhật trạng thái'); loadCategories(); }
   catch { showToast('Không thể cập nhật', 'error'); }
+}
+
+async function deleteCat(id, name, productCount) {
+  if (productCount > 0) {
+    showToast(`Không thể xóa danh mục "${name}" vì còn ${productCount} sản phẩm`, 'error');
+    return;
+  }
+  if (!confirm(`Xóa danh mục "${name}"? Hành động này không thể hoàn tác.`)) return;
+  try {
+    await api.categories.delete(id);
+    showToast('Đã xóa danh mục');
+    loadCategories();
+  } catch (err) { showToast(err.message || 'Không thể xóa danh mục', 'error'); }
 }
 </script>
 </body>
