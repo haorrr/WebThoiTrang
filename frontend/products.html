@@ -155,9 +155,12 @@ async function loadCategories() {
 }
 
 function getProductImageUrl(product) {
-  if (!product.images || product.images.length === 0) return 'images/product-jacket.png';
-  const primary = product.images.find(i => i.primary) || product.images[0];
-  return primary.imageUrl || 'images/product-jacket.png';
+  if (product.primaryImageUrl) return product.primaryImageUrl;
+  if (product.images && product.images.length > 0) {
+    const primary = product.images.find(i => i.primary || i.isPrimary) || product.images[0];
+    return primary.imageUrl || 'images/product-jacket.png';
+  }
+  return 'images/product-jacket.png';
 }
 
 function renderProductCard(p) {
