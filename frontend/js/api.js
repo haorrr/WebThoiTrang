@@ -9,7 +9,7 @@ const Auth = {
     try { return JSON.parse(localStorage.getItem('userInfo')); } catch { return null; }
   },
   save: (accessToken, refreshToken, userInfo) => {
-    localStorage.setItem('accessToken', accessToken);
+    if (accessToken) localStorage.setItem('accessToken', accessToken);
     if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
     if (userInfo) localStorage.setItem('userInfo', JSON.stringify(userInfo));
   },
