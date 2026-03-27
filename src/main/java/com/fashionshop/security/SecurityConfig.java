@@ -1,6 +1,7 @@
 package com.fashionshop.security;
 
 import com.fashionshop.security.oauth2.CustomOAuth2UserService;
+import com.fashionshop.security.oauth2.CustomOidcUserService;
 import com.fashionshop.security.oauth2.OAuth2AuthenticationFailureHandler;
 import com.fashionshop.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOidcUserService customOidcUserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
 
@@ -63,7 +65,10 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/login.html")
-                .userInfoEndpoint(u -> u.userService(customOAuth2UserService))
+                .userInfoEndpoint(u -> u
+                    .userService(customOAuth2UserService)
+                    .oidcUserService(customOidcUserService)
+                )
                 .successHandler(oAuth2SuccessHandler)
                 .failureHandler(oAuth2FailureHandler)
             )
