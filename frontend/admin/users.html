@@ -92,7 +92,7 @@ async function loadUsers() {
             </div>
           </td>
           <td style="font-size:0.82rem">${u.email}</td>
-          <td>${u.role === 'ROLE_ADMIN' ? '<span class="badge badge-warning">Admin</span>' : '<span class="badge badge-secondary">Thành viên</span>'}</td>
+          <td>${u.role === 'ROLE_ADMIN' || u.role === 'ADMIN' ? '<span class="badge badge-warning">Admin</span>' : '<span class="badge badge-secondary">Thành viên</span>'}</td>
           <td style="font-size:0.82rem">${u.provider}</td>
           <td style="font-size:0.8rem;color:var(--color-text-muted)">${formatDate(u.createdAt)}</td>
           <td>${getStatusBadge(u.status)}</td>
