@@ -42,7 +42,7 @@
 </div>
 
 <!-- Modal -->
-<div id="modal" class="modal-backdrop" style="display:none">
+<div id="modal" class="modal-overlay">
   <div class="modal" style="max-width:560px">
     <div class="modal__header">
       <h3 id="modalTitle">Tạo Flash Sale</h3>
@@ -77,11 +77,11 @@
 </div>
 
 <!-- Product modal -->
-<div id="productModal" class="modal-backdrop" style="display:none">
+<div id="productModal" class="modal-overlay">
   <div class="modal" style="max-width:600px">
     <div class="modal__header">
       <h3>Thêm sản phẩm vào Flash Sale</h3>
-      <button class="modal__close" onclick="document.getElementById('productModal').style.display='none'">✕</button>
+      <button class="modal__close" onclick="document.getElementById('productModal').classList.remove('open')">✕</button>
     </div>
     <div class="modal__body">
       <input type="hidden" id="pmFlashId">
@@ -148,7 +148,7 @@ function openModal(id) {
   document.getElementById('fsStart').value = '';
   document.getElementById('fsEnd').value = '';
   document.getElementById('modalTitle').textContent = 'Tạo Flash Sale';
-  document.getElementById('modal').style.display = 'flex';
+  document.getElementById('modal').classList.add('open');
 }
 
 async function editSale(id) {
@@ -160,7 +160,7 @@ async function editSale(id) {
   document.getElementById('fsStart').value = fs.startsAt.slice(0,16);
   document.getElementById('fsEnd').value = fs.endsAt.slice(0,16);
   document.getElementById('modalTitle').textContent = 'Sửa Flash Sale';
-  document.getElementById('modal').style.display = 'flex';
+  document.getElementById('modal').classList.add('open');
 }
 
 async function save() {
@@ -183,7 +183,7 @@ async function save() {
   setLoading(btn, false);
 }
 
-function closeModal() { document.getElementById('modal').style.display = 'none'; }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
 async function deleteSale(id) {
   if (!confirm('Hủy flash sale này?')) return;
@@ -195,7 +195,7 @@ function openProductModal(fsId) {
   document.getElementById('pmFlashId').value = fsId;
   document.getElementById('pmSearch').value = '';
   document.getElementById('pmResults').innerHTML = '';
-  document.getElementById('productModal').style.display = 'flex';
+  document.getElementById('productModal').classList.add('open');
 }
 
 function debounceProductSearch() {
@@ -224,7 +224,7 @@ async function addProductToSale(productId) {
   try {
     await api.flashSales.addProduct(fsId, productId, stockLimit);
     showToast('Đã thêm sản phẩm');
-    document.getElementById('productModal').style.display = 'none';
+    document.getElementById('productModal').classList.remove('open');
     loadSales();
   } catch (e) { showToast(e.message, 'error'); }
 }
