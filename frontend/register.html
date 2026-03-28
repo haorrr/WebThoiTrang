@@ -58,6 +58,11 @@
           </div>
           <p class="form-hint">Tối thiểu 6 ký tự</p>
         </div>
+        <div class="form-group" id="refGroup">
+          <label class="form-label" for="referralCode">Mã giới thiệu <span style="color:var(--color-text-muted);font-weight:400">(tùy chọn)</span></label>
+          <input class="form-input" type="text" id="referralCode" placeholder="Nhập mã nếu được bạn bè giới thiệu" maxlength="20" style="text-transform:uppercase">
+          <p class="form-hint" id="refHint"></p>
+        </div>
         <button type="submit" class="btn btn-primary" style="width:100%" id="submitBtn">
           Tạo tài khoản
         </button>
@@ -78,6 +83,15 @@
 <script>
   if (Auth.isLoggedIn()) window.location.href = 'index.html';
 
+  // Auto-fill referral code from URL ?ref=CODE
+  const urlRef = new URLSearchParams(window.location.search).get('ref');
+  if (urlRef) {
+    const refInput = document.getElementById('referralCode');
+    refInput.value = urlRef.toUpperCase();
+    document.getElementById('refHint').textContent = '✓ Mã giới thiệu đã được điền tự động';
+    document.getElementById('refHint').style.color = '#16A34A';
+  }
+
   const pwInput = document.getElementById('password');
   document.getElementById('togglePw').addEventListener('click', () => {
     pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
@@ -94,7 +108,8 @@
       const res = await api.auth.register(
         document.getElementById('name').value.trim(),
         document.getElementById('email').value.trim(),
-        document.getElementById('password').value
+        document.getElementById('password').value,
+        document.getElementById('referralCode').value.trim().toUpperCase() || null
       );
       if (res.success) {
         alertBox.innerHTML = `<div class="alert alert-success">Đăng ký thành công! Đang chuyển đến đăng nhập...</div>`;

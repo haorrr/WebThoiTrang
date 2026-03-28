@@ -33,6 +33,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final CustomUserDetailsService userDetailsService;
+    private final ReferralService referralService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -52,6 +53,8 @@ public class AuthService {
         String refreshToken = jwtService.generateRefreshToken();
         user.setRefreshToken(passwordEncoder.encode(refreshToken));
         user = userRepository.save(user);
+
+        referralService.applyReferral(user, request.getReferralCode());
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtService.generateAccessToken(userDetails);

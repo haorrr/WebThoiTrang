@@ -85,7 +85,7 @@ async function apiFetch(endpoint, options = {}) {
 const api = {
   auth: {
     login: (email, password) => apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-    register: (name, email, password) => apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
+    register: (name, email, password, referralCode) => apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, referralCode: referralCode || null }) }),
     logout: () => apiFetch('/auth/logout', { method: 'POST', body: JSON.stringify({ refreshToken: Auth.getRefresh() }) }),
     forgotPassword: (email) => apiFetch('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }),
     verifyResetToken: (token) => apiFetch(`/auth/verify-reset-token?token=${token}`),
