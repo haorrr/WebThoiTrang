@@ -107,7 +107,7 @@ async function loadOrders() {
 
 async function updateStatus(id, status) {
   try {
-    await api.orders.adminUpdateStatus(id, status);
+    await api.orders.adminUpdateStatus(id, { status });
     showToast('Đã cập nhật trạng thái đơn hàng');
     loadOrders();
   } catch (err) { showToast(err.message || 'Không thể cập nhật', 'error'); }
