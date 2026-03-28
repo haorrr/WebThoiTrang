@@ -345,14 +345,23 @@
           const endsAt = new Date(fs.endsAt).getTime();
           const banner = document.createElement('div');
           banner.id = 'flash-banner';
-          banner.style.cssText = 'background:linear-gradient(90deg,#DC2626,#F97316);color:#fff;text-align:center;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;';
+          banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:1100;background:linear-gradient(90deg,#DC2626,#F97316);color:#fff;text-align:center;padding:10px;font-weight:700;font-size:0.9rem;cursor:pointer;';
           banner.onclick = () => window.location.href = `flash-sale.html?id=${fs.id}`;
           banner.innerHTML = `🔥 FLASH SALE — ${fs.name} — Giảm ${fs.discountPercent}% | <span id="fs-countdown"></span>`;
-          document.getElementById('navbar').after(banner);
+          document.body.prepend(banner);
+          // Push navbar down below banner
+          const bannerH = 42;
+          const navbar = document.getElementById('navbar');
+          navbar.style.top = `calc(var(--space-md) + ${bannerH}px)`;
           // Countdown
-          setInterval(() => {
+          const bannerTimer = setInterval(() => {
             const diff = endsAt - Date.now();
-            if (diff <= 0) { banner.remove(); return; }
+            if (diff <= 0) {
+              banner.remove();
+              document.getElementById('navbar').style.top = '';
+              clearInterval(bannerTimer);
+              return;
+            }
             const h = Math.floor(diff/3600000);
             const m = Math.floor((diff%3600000)/60000);
             const s = Math.floor((diff%60000)/1000);
