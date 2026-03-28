@@ -68,13 +68,14 @@
   </div>
 </footer>
 
-<script src="js/api.js"></script>
+<script src="js/api.js?v=3"></script>
 <script>
 const params = new URLSearchParams(window.location.search);
 const productId = params.get('id');
 
 let selectedSize = '';
 let selectedColor = '';
+let selectedVariantId = null;
 let currentImageIndex = 0;
 let product = null;
 
@@ -90,9 +91,18 @@ function renderProduct(p) {
   document.getElementById('breadcrumbName').textContent = p.name;
 
   const images = p.images || [];
-  const price = p.salePrice || p.price;
-  const hasDiscount = p.salePrice && p.salePrice < p.price;
-  const inStock = p.stock > 0;
+  const variants = p.variants || [];
+  const displayPrice = p.flashPrice || p.salePrice || p.price;
+  const origPrice = p.price;
+  const hasDiscount = displayPrice < origPrice;
+  const inStock = p.stock > 0 || variants.some(v => v.stock > 0);
+
+  // Build size/color options from variants if available, else show static defaults
+  const hasSizeVariants = variants.some(v => v.size);
+  const hasColorVariants = variants.some(v => v.color);
+  const uniqueSizes = hasSizeVariants ? [...new Set(variants.filter(v => v.size).map(v => v.size))] : ['S','M','L','XL','XXL'];
+  const uniqueColors = hasColorVariants ? [...new Set(variants.filter(v => v.color && v.colorCode).map(v => JSON.stringify({color:v.color,code:v.colorCode})))]
+    .map(s => JSON.parse(s)) : [{color:'Đen',code:'#1C1917'},{color:'Trắng',code:'#FFFFFF'},{color:'Xanh',code:'#1D4ED8'},{color:'Đỏ',code:'#DC2626'}];
 
   const thumbsHtml = images.length > 1 ? images.map((img, i) =>
     `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" data-idx="${i}">
@@ -113,11 +123,12 @@ function renderProduct(p) {
     <div>
       <span class="section-label">${p.category?.name || ''}</span>
       <h1 class="product-title">${p.name}</h1>
+      ${p.flashPrice ? `<div style="margin-bottom:6px"><span class="product-card__flash">🔥 FLASH SALE</span></div>` : ''}
       <div class="product-price-row">
-        <span class="product-price">${formatVND(price)}</span>
-        ${hasDiscount ? `<span class="product-price-original">${formatVND(p.price)}</span>` : ''}
+        <span class="product-price" style="${p.flashPrice ? 'color:#DC2626' : ''}">${formatVND(displayPrice)}</span>
+        ${hasDiscount ? `<span class="product-price-original">${formatVND(origPrice)}</span>` : ''}
       </div>
-      <p class="product-stock">
+      <p class="product-stock" id="stockInfo">
         ${inStock
           ? `<span class="in-stock">✓ Còn hàng (${p.stock} sản phẩm)</span>`
           : `<span class="out-stock">✗ Hết hàng</span>`}
@@ -129,7 +140,10 @@ function renderProduct(p) {
       <div style="margin-bottom:1.5rem">
         <p class="option-label">Kích thước</p>
         <div class="size-options">
-          ${['S','M','L','XL','XXL'].map(s => `<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('')}
+          ${uniqueSizes.map(s => {
+            const variantStock = hasSizeVariants ? variants.filter(v => v.size === s).reduce((sum,v) => sum + v.stock, 0) : p.stock;
+            return `<button class="size-btn ${variantStock === 0 ? 'disabled' : ''}" onclick="selectSize('${s}',this)" ${variantStock === 0 ? 'disabled' : ''}>${s}</button>`;
+          }).join('')}
         </div>
       </div>
 
@@ -137,8 +151,8 @@ function renderProduct(p) {
       <div style="margin-bottom:2rem">
         <p class="option-label">Màu sắc</p>
         <div class="color-options">
-          ${[['#1C1917','Đen'],['#FFFFFF','Trắng'],['#CA8A04','Vàng'],['#1D4ED8','Xanh'],['#DC2626','Đỏ']].map(([clr,name]) =>
-            `<div class="color-dot" style="background:${clr};border-color:${clr === '#FFFFFF' ? '#E7E5E4' : clr}" title="${name}" onclick="selectColor('${name}',this)"></div>`
+          ${uniqueColors.map(({color,code}) =>
+            `<div class="color-dot" style="background:${code};border-color:${code === '#FFFFFF' ? '#E7E5E4' : code}" title="${color}" onclick="selectColor('${color}',this)"></div>`
           ).join('')}
         </div>
       </div>
@@ -149,7 +163,10 @@ function renderProduct(p) {
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           ${inStock ? 'Thêm vào giỏ' : 'Hết hàng'}
         </button>
-        <a href="cart.html" class="btn btn-outline">Xem giỏ hàng</a>
+        <button class="btn btn-outline" id="wishBtn" onclick="toggleWish()" title="Yêu thích">
+          <svg id="wishIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <a href="cart.html" class="btn btn-outline">Giỏ hàng</a>
       </div>
 
       ${p.aiDescription ? `
@@ -173,12 +190,54 @@ function selectSize(size, btn) {
   selectedSize = size;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  updateVariantSelection();
 }
 
 function selectColor(color, btn) {
   selectedColor = color;
   document.querySelectorAll('.color-dot').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
+  updateVariantSelection();
+}
+
+function updateVariantSelection() {
+  if (!product?.variants?.length) return;
+  const v = product.variants.find(vv =>
+    (!selectedSize || vv.size === selectedSize) &&
+    (!selectedColor || vv.color === selectedColor)
+  );
+  selectedVariantId = v?.id || null;
+  const stock = v ? v.stock : product.stock;
+  const stockEl = document.getElementById('stockInfo');
+  if (stockEl) {
+    stockEl.innerHTML = stock > 0
+      ? `<span class="in-stock">✓ Còn hàng (${stock} sản phẩm)</span>`
+      : `<span class="out-stock">✗ Hết hàng</span>`;
+  }
+  const addBtn = document.getElementById('addToCartBtn');
+  if (addBtn) addBtn.disabled = stock === 0;
+}
+
+async function toggleWish() {
+  if (!Auth.isLoggedIn()) { window.location.href = 'login.html'; return; }
+  try {
+    const res = await api.wishlist.toggle(productId);
+    const wishlisted = res.data?.wishlisted;
+    const icon = document.getElementById('wishIcon');
+    if (icon) { icon.style.fill = wishlisted ? '#EF4444' : 'none'; icon.style.stroke = wishlisted ? '#EF4444' : 'currentColor'; }
+    showToast(wishlisted ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích');
+  } catch {}
+}
+
+async function checkWishlistStatus() {
+  if (!Auth.isLoggedIn() || !productId) return;
+  try {
+    const res = await api.wishlist.check(productId);
+    if (res.data?.wishlisted) {
+      const icon = document.getElementById('wishIcon');
+      if (icon) { icon.style.fill = '#EF4444'; icon.style.stroke = '#EF4444'; }
+    }
+  } catch {}
 }
 
 async function addToCart() {
@@ -190,7 +249,7 @@ async function addToCart() {
   const btn = document.getElementById('addToCartBtn');
   setLoading(btn, true);
   try {
-    const res = await api.cart.addItem(productId, 1, selectedSize, selectedColor);
+    const res = await api.cart.addItem(productId, 1, selectedSize, selectedColor, selectedVariantId);
     if (res.success) {
       showToast('Đã thêm vào giỏ hàng!');
       updateCartCount();
@@ -287,6 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (res.success && res.data) {
       renderProduct(res.data);
       loadReviews();
+      checkWishlistStatus();
     }
   } catch {
     document.getElementById('productContent').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><h3>Không tìm thấy sản phẩm</h3><p><a href="products.html">Quay lại</a></p></div>`;

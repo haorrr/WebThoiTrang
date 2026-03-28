@@ -6,6 +6,41 @@
   <title>Quản lý sản phẩm — Admin MAISON</title>
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="../shared.css">
+  <style>
+    .modal-tab {
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      transition: all 0.15s;
+    }
+    .modal-tab:hover { color: var(--color-text); }
+    .modal-tab.active { color: var(--color-cta); border-bottom-color: var(--color-cta); }
+    .variant-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 80px 80px auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.82rem;
+      background: var(--color-surface);
+    }
+    .variant-color-dot {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.15);
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+  </style>
 </head>
 <body class="admin-page">
 
@@ -69,51 +104,116 @@
       <h3 id="modalTitle">Thêm sản phẩm mới</h3>
       <button class="modal__close" onclick="closeProductModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
+    <!-- Modal Tabs (only visible when editing) -->
+    <div id="modalTabs" style="display:none;border-bottom:1px solid var(--color-border);padding:0 1.5rem">
+      <div style="display:flex;gap:0">
+        <button type="button" class="modal-tab active" id="tabInfo" onclick="switchModalTab('info')">Thông tin</button>
+        <button type="button" class="modal-tab" id="tabVariants" onclick="switchModalTab('variants')">Biến thể</button>
+        <button type="button" class="modal-tab" id="tabImages" onclick="switchModalTab('images')">Hình ảnh</button>
+      </div>
+    </div>
     <div id="modalAlertBox"></div>
-    <form id="productForm">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Tên sản phẩm *</label>
-          <input class="form-input" id="pName" required placeholder="Tên sản phẩm">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Danh mục *</label>
-          <select class="form-select" id="pCategory" required>
-            <option value="">Chọn danh mục</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Giá gốc (VND) *</label>
-          <input class="form-input" type="number" id="pPrice" required placeholder="500000" min="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Giá khuyến mãi (VND)</label>
-          <input class="form-input" type="number" id="pSalePrice" placeholder="Để trống nếu không KM" min="0">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Tồn kho *</label>
-          <input class="form-input" type="number" id="pStock" required placeholder="100" min="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Trạng thái</label>
-          <select class="form-select" id="pStatus">
-            <option value="ACTIVE">Hiển thị</option>
-            <option value="INACTIVE">Ẩn</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Mô tả</label>
-        <textarea class="form-textarea" id="pDescription" placeholder="Mô tả sản phẩm..." rows="3"></textarea>
-      </div>
 
-      <!-- Image Section -->
+    <!-- Tab: Info -->
+    <div id="tabInfoPanel">
+      <form id="productForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tên sản phẩm *</label>
+            <input class="form-input" id="pName" required placeholder="Tên sản phẩm">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Danh mục *</label>
+            <select class="form-select" id="pCategory" required>
+              <option value="">Chọn danh mục</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Giá gốc (VND) *</label>
+            <input class="form-input" type="number" id="pPrice" required placeholder="500000" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Giá khuyến mãi (VND)</label>
+            <input class="form-input" type="number" id="pSalePrice" placeholder="Để trống nếu không KM" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tồn kho *</label>
+            <input class="form-input" type="number" id="pStock" required placeholder="100" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trạng thái</label>
+            <select class="form-select" id="pStatus">
+              <option value="ACTIVE">Hiển thị</option>
+              <option value="INACTIVE">Ẩn</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả</label>
+          <textarea class="form-textarea" id="pDescription" placeholder="Mô tả sản phẩm..." rows="3"></textarea>
+        </div>
+        <input type="hidden" id="pId">
+      </form>
+    </div>
+
+    <!-- Tab: Variants -->
+    <div id="tabVariantsPanel" style="display:none">
+      <div style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <p style="font-size:0.85rem;color:var(--color-text-muted)">Quản lý kích thước, màu sắc và tồn kho từng biến thể.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openVariantForm()">+ Thêm biến thể</button>
+        </div>
+        <!-- Add/Edit variant inline form -->
+        <div id="variantForm" style="display:none;background:var(--color-bg);border:1px solid var(--color-border);border-radius:10px;padding:14px;margin-bottom:14px">
+          <input type="hidden" id="vId">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="font-size:0.78rem">Kích thước</label>
+              <input class="form-input" id="vSize" placeholder="S, M, L, XL...">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="font-size:0.78rem">Màu sắc</label>
+              <input class="form-input" id="vColor" placeholder="Đen, Trắng...">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="font-size:0.78rem">Mã màu (hex)</label>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input class="form-input" id="vColorCode" placeholder="#000000" style="flex:1" oninput="syncColorPicker()">
+                <input type="color" id="vColorPicker" style="width:34px;height:34px;padding:2px;border:1px solid var(--color-border);border-radius:6px;cursor:pointer" oninput="syncColorInput()">
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="font-size:0.78rem">SKU</label>
+              <input class="form-input" id="vSku" placeholder="SKU-001">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="font-size:0.78rem">Tồn kho *</label>
+              <input class="form-input" type="number" id="vStock" placeholder="50" min="0">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label" style="font-size:0.78rem">Điều chỉnh giá (VND)</label>
+              <input class="form-input" type="number" id="vPriceAdj" placeholder="0" step="1000">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button type="button" class="btn btn-outline btn-sm" onclick="cancelVariantForm()">Hủy</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveVariant()">Lưu biến thể</button>
+          </div>
+        </div>
+        <!-- Variants list -->
+        <div id="variantsList"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Images -->
+    <div id="tabImagesPanel" style="display:none">
       <div class="form-group" id="imageSection">
-        <label class="form-label">Ảnh sản phẩm</label>
         <div id="existingImages" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
         <div style="display:flex;gap:8px;margin-bottom:8px">
           <button type="button" class="btn btn-xs btn-outline" id="tabUpload" onclick="switchImgTab('upload')" style="font-size:0.8rem">Upload file</button>
@@ -140,12 +240,11 @@
         </div>
         <p id="imgNote" style="font-size:0.75rem;color:var(--color-text-muted);margin-top:6px">Lưu sản phẩm trước, sau đó mới có thể thêm ảnh.</p>
       </div>
+    </div>
 
-      <input type="hidden" id="pId">
-    </form>
     <div class="modal__footer">
       <button class="btn btn-outline" onclick="closeProductModal()">Hủy</button>
-      <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">Lưu sản phẩm</button>
+      <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()" style="display:none">Lưu sản phẩm</button>
     </div>
   </div>
 </div>
@@ -163,7 +262,7 @@
   </div>
 </div>
 
-<script src="../js/api.js?v=2"></script>
+<script src="../js/api.js?v=3"></script>
 <script>
 let currentPage = 0;
 let searchTimeout;
@@ -269,7 +368,25 @@ function openProductModal(id = null) {
   document.getElementById('tabUpload').style.display = id ? '' : 'none';
   document.getElementById('tabUrl').style.display = id ? '' : 'none';
   switchImgTab('upload');
+  // Show tabs only when editing
+  document.getElementById('modalTabs').style.display = id ? '' : 'none';
+  document.getElementById('saveProductBtn').style.display = '';
+  switchModalTab('info');
   document.getElementById('productModal').classList.add('open');
+}
+
+function switchModalTab(tab) {
+  document.getElementById('tabInfoPanel').style.display = tab === 'info' ? '' : 'none';
+  document.getElementById('tabVariantsPanel').style.display = tab === 'variants' ? '' : 'none';
+  document.getElementById('tabImagesPanel').style.display = tab === 'images' ? '' : 'none';
+  ['Info','Variants','Images'].forEach(t => {
+    document.getElementById('tab' + t).classList.toggle('active', tab === t.toLowerCase());
+  });
+  if (tab === 'variants') {
+    const pid = document.getElementById('pId').value;
+    if (pid) loadVariants(pid);
+  }
+  document.getElementById('saveProductBtn').style.display = tab === 'info' ? '' : 'none';
 }
 
 function switchImgTab(tab) {
@@ -378,7 +495,112 @@ async function editProduct(id) {
   } catch {}
 }
 
-function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
+// ─── Variants ────────────────────────────────────────────────
+async function loadVariants(productId) {
+  const container = document.getElementById('variantsList');
+  container.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--color-text-muted);font-size:0.85rem">Đang tải...</div>';
+  try {
+    const res = await api.variants.list(productId);
+    const variants = res.data || [];
+    if (!variants.length) {
+      container.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--color-text-muted);font-size:0.85rem">Chưa có biến thể nào. Nhấn "+ Thêm biến thể" để bắt đầu.</div>';
+      return;
+    }
+    container.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px 90px auto;gap:8px;padding:6px 10px;font-size:0.75rem;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.05em">
+        <span>Kích thước</span><span>Màu sắc</span><span>SKU</span><span>Tồn kho</span><span>Điều chỉnh giá</span><span></span>
+      </div>
+      ${variants.map(v => `
+        <div class="variant-row">
+          <span>${v.size || '—'}</span>
+          <span>
+            ${v.colorCode ? `<span class="variant-color-dot" style="background:${v.colorCode}"></span>` : ''}
+            ${v.color || '—'}
+          </span>
+          <span style="font-family:monospace;font-size:0.78rem">${v.sku || '—'}</span>
+          <span><strong>${v.stock}</strong></span>
+          <span style="color:${v.priceAdjustment > 0 ? '#16A34A' : v.priceAdjustment < 0 ? '#DC2626' : 'inherit'}">
+            ${v.priceAdjustment > 0 ? '+' : ''}${v.priceAdjustment ? formatVND(v.priceAdjustment) : '0'}
+          </span>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-xs btn-outline" onclick="editVariant(${JSON.stringify(v).replace(/"/g,'&quot;')})">Sửa</button>
+            <button class="btn btn-xs btn-danger" onclick="deleteVariant(${v.id})">Xóa</button>
+          </div>
+        </div>`).join('')}`;
+  } catch { container.innerHTML = '<div style="color:#DC2626;font-size:0.85rem;padding:8px">Không thể tải biến thể</div>'; }
+}
+
+function openVariantForm() {
+  document.getElementById('vId').value = '';
+  document.getElementById('vSize').value = '';
+  document.getElementById('vColor').value = '';
+  document.getElementById('vColorCode').value = '';
+  document.getElementById('vColorPicker').value = '#000000';
+  document.getElementById('vSku').value = '';
+  document.getElementById('vStock').value = '';
+  document.getElementById('vPriceAdj').value = '0';
+  document.getElementById('variantForm').style.display = '';
+  document.getElementById('vSize').focus();
+}
+
+function cancelVariantForm() { document.getElementById('variantForm').style.display = 'none'; }
+
+function editVariant(v) {
+  document.getElementById('vId').value = v.id;
+  document.getElementById('vSize').value = v.size || '';
+  document.getElementById('vColor').value = v.color || '';
+  document.getElementById('vColorCode').value = v.colorCode || '';
+  document.getElementById('vColorPicker').value = v.colorCode || '#000000';
+  document.getElementById('vSku').value = v.sku || '';
+  document.getElementById('vStock').value = v.stock;
+  document.getElementById('vPriceAdj').value = v.priceAdjustment || 0;
+  document.getElementById('variantForm').style.display = '';
+  document.getElementById('variantForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function saveVariant() {
+  const pid = document.getElementById('pId').value;
+  const vid = document.getElementById('vId').value;
+  const data = {
+    size: document.getElementById('vSize').value.trim() || null,
+    color: document.getElementById('vColor').value.trim() || null,
+    colorCode: document.getElementById('vColorCode').value.trim() || null,
+    sku: document.getElementById('vSku').value.trim() || null,
+    stock: parseInt(document.getElementById('vStock').value) || 0,
+    priceAdjustment: parseFloat(document.getElementById('vPriceAdj').value) || 0,
+  };
+  try {
+    if (vid) await api.variants.update(pid, vid, data);
+    else await api.variants.create(pid, data);
+    showToast(vid ? 'Đã cập nhật biến thể' : 'Đã thêm biến thể');
+    cancelVariantForm();
+    loadVariants(pid);
+  } catch (e) { showToast(e.message || 'Lỗi', 'error'); }
+}
+
+async function deleteVariant(vid) {
+  if (!confirm('Xóa biến thể này?')) return;
+  const pid = document.getElementById('pId').value;
+  try {
+    await api.variants.delete(pid, vid);
+    showToast('Đã xóa biến thể');
+    loadVariants(pid);
+  } catch (e) { showToast(e.message || 'Lỗi', 'error'); }
+}
+
+function syncColorPicker() {
+  const val = document.getElementById('vColorCode').value;
+  if (/^#[0-9A-Fa-f]{6}$/.test(val)) document.getElementById('vColorPicker').value = val;
+}
+
+function syncColorInput() {
+  document.getElementById('vColorCode').value = document.getElementById('vColorPicker').value;
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+  cancelVariantForm();
+}
 
 async function saveProduct() {
   const id = document.getElementById('pId').value;

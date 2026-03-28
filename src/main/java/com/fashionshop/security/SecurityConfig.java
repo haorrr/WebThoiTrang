@@ -50,10 +50,11 @@ public class SecurityConfig {
                     "/", "/index.html", "/*.html", "/admin/*.html", "/oauth2/*.html",
                     "/*.css", "/*.js", "/css/**", "/js/**", "/images/**", "/favicon.ico"
                 ).permitAll()
-                // Public product/category browsing
+                // Public product/category/flash-sale browsing
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/flash-sales/**").permitAll()
                 // Swagger / Actuator
                 .requestMatchers(
                     "/swagger-ui/**", "/swagger-ui.html",

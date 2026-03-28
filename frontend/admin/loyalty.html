@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điểm thưởng — Admin MAISON</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar__logo"><a href="../index.html">MAISON<span>.</span></a></div>
+    <nav class="admin-sidebar__nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="products.html">Sản phẩm</a>
+      <a href="categories.html">Danh mục</a>
+      <a href="orders.html">Đơn hàng</a>
+      <a href="flash-sales.html">Flash Sale</a>
+      <a href="coupons.html">Coupon</a>
+      <a href="users.html">Người dùng</a>
+      <a href="reviews.html">Đánh giá</a>
+      <a href="loyalty.html" class="active">Điểm thưởng</a>
+      <a href="inventory.html">Tồn kho</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1 class="admin-topbar__title">🎁 Chương trình điểm thưởng</h1>
+    </div>
+
+    <div class="admin-content">
+      <!-- Rules overview -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
+        <div class="admin-card" style="text-align:center;padding:1.5rem">
+          <div style="font-size:2rem;margin-bottom:8px">🛍️</div>
+          <div style="font-size:1.5rem;font-weight:700;color:var(--color-cta)">1 điểm</div>
+          <div style="font-size:0.85rem;color:var(--color-text-muted);margin-top:4px">mỗi 10.000 VND chi tiêu</div>
+        </div>
+        <div class="admin-card" style="text-align:center;padding:1.5rem">
+          <div style="font-size:2rem;margin-bottom:8px">💰</div>
+          <div style="font-size:1.5rem;font-weight:700;color:#16A34A">1.000 VND</div>
+          <div style="font-size:0.85rem;color:var(--color-text-muted);margin-top:4px">giá trị mỗi 1 điểm khi đổi</div>
+        </div>
+        <div class="admin-card" style="text-align:center;padding:1.5rem">
+          <div style="font-size:2rem;margin-bottom:8px">🤝</div>
+          <div style="font-size:1.5rem;font-weight:700;color:#7C3AED">50 điểm</div>
+          <div style="font-size:0.85rem;color:var(--color-text-muted);margin-top:4px">thưởng giới thiệu thành công</div>
+        </div>
+      </div>
+
+      <!-- User lookup -->
+      <div class="admin-card" style="margin-bottom:1.5rem">
+        <div class="admin-card__title">Tra cứu điểm thưởng theo người dùng</div>
+        <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:1rem">
+          <div class="form-group" style="margin:0;flex:1;max-width:360px">
+            <label class="form-label">Email người dùng</label>
+            <input type="email" id="lookupEmail" class="form-input" placeholder="user@example.com">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="lookupUser()">Tra cứu</button>
+        </div>
+        <div id="lookupResult"></div>
+      </div>
+
+      <!-- Loyalty type legend -->
+      <div class="admin-card">
+        <div class="admin-card__title">Các loại giao dịch điểm</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#16A34A20;color:#16A34A">EARNED</span>
+            <span style="font-size:0.85rem">Điểm tích lũy từ đơn hàng hoàn thành</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#DC262620;color:#DC2626">REDEEMED</span>
+            <span style="font-size:0.85rem">Điểm đã dùng để thanh toán đơn hàng</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#7C3AED20;color:#7C3AED">REFERRAL_BONUS</span>
+            <span style="font-size:0.85rem">Điểm thưởng từ chương trình giới thiệu</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#F9731620;color:#F97316">EXPIRED</span>
+            <span style="font-size:0.85rem">Điểm đã hết hạn (chưa sử dụng)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/api.js?v=3"></script>
+<script>
+const typeColor = { EARNED: '#16A34A', REDEEMED: '#DC2626', REFERRAL_BONUS: '#7C3AED', EXPIRED: '#F97316' };
+const typeLabel = { EARNED: 'Tích lũy', REDEEMED: 'Đổi điểm', REFERRAL_BONUS: 'Giới thiệu', EXPIRED: 'Hết hạn' };
+
+async function lookupUser() {
+  const email = document.getElementById('lookupEmail').value.trim();
+  if (!email) { showToast('Nhập email người dùng', 'error'); return; }
+  const el = document.getElementById('lookupResult');
+  el.innerHTML = '<div style="color:var(--color-text-muted);font-size:0.85rem">Đang tìm kiếm...</div>';
+  try {
+    // Find user by searching users list
+    const res = await api.users.list({ keyword: email, size: 1 });
+    const user = res.data?.content?.[0];
+    if (!user || user.email !== email) {
+      el.innerHTML = '<div style="color:#DC2626;font-size:0.85rem">Không tìm thấy người dùng với email này.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div style="border:1px solid var(--color-border);border-radius:10px;overflow:hidden">
+        <div style="padding:14px 18px;background:var(--color-bg);border-bottom:1px solid var(--color-border);display:flex;gap:16px;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--color-cta);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem">${(user.name||'?')[0].toUpperCase()}</div>
+          <div>
+            <div style="font-weight:600">${user.name}</div>
+            <div style="font-size:0.8rem;color:var(--color-text-muted)">${user.email}</div>
+          </div>
+          ${user.loyaltyPoints != null ? `<div style="margin-left:auto;text-align:right">
+            <div style="font-size:1.4rem;font-weight:700;color:var(--color-cta)">${user.loyaltyPoints} điểm</div>
+            <div style="font-size:0.75rem;color:var(--color-text-muted)">≈ ${formatVND(user.loyaltyPoints * 1000)}</div>
+          </div>` : ''}
+        </div>
+        <div style="padding:10px 18px;font-size:0.82rem;color:var(--color-text-muted)">
+          Mã giới thiệu: <strong>${user.referralCode || '—'}</strong>
+          ${user.referredBy ? ` · Được giới thiệu bởi: <strong>#${user.referredById}</strong>` : ''}
+          · Thành viên từ: ${new Date(user.createdAt).toLocaleDateString('vi-VN')}
+        </div>
+      </div>`;
+  } catch (e) {
+    el.innerHTML = `<div style="color:#DC2626;font-size:0.85rem">Lỗi: ${e.message}</div>`;
+  }
+}
+
+document.getElementById('lookupEmail').addEventListener('keydown', e => { if (e.key === 'Enter') lookupUser(); });
+document.addEventListener('DOMContentLoaded', () => {});
+</script>
+</body>
+</html>

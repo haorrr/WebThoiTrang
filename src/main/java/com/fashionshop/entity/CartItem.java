@@ -30,6 +30,10 @@ public class CartItem {
     @Builder.Default
     private Integer quantity = 1;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variant_id")
+    private ProductVariant variant;
+
     @Column(length = 20)
     private String size;
 

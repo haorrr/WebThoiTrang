@@ -24,7 +24,15 @@
       "Bash(py --version)",
       "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"fashion ecommerce luxury clothing store elegant\" --design-system -p \"FashionShop\")",
       "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"landing hero cta social proof\" --domain landing -n 3)",
-      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"layout responsive accessibility\" --stack html-tailwind)"
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"layout responsive accessibility\" --stack html-tailwind)",
+      "Bash(grep -E \"\\\\.java$\")",
+      "Bash(/tmp/report.md:*)",
+      "Bash(cp /tmp/report.md /d/Desktop/WebThoiTrang/plans/phase-01/reports/backend-analysis.md)",
+      "Bash(/d/Desktop/WebThoiTrang/plans/phase-01/reports/file-locations.md:*)",
+      "Bash(wc -l /d/Desktop/WebThoiTrang/plans/phase-01/reports/*.md)",
+      "Bash(du -h /d/Desktop/WebThoiTrang/plans/phase-01/reports/*)",
+      "Bash(xargs grep:*)",
+      "Bash(./mvnw compile:*)"
     ]
   }
 }

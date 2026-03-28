@@ -30,4 +30,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     long countByDeletedAtIsNullAndStatus(User.Status status);
 
     long countByDeletedAtIsNullAndCreatedAtAfter(LocalDateTime after);
+
+    Optional<User> findByReferralCode(String referralCode);
+
+    boolean existsByReferralCode(String referralCode);
 }

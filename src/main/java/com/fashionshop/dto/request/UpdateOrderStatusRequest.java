@@ -8,4 +8,8 @@ public class UpdateOrderStatusRequest {
 
     @NotBlank(message = "Status is required")
     private String status;
+
+    private String trackingNumber;
+
+    private java.time.LocalDate estimatedDelivery;
 }

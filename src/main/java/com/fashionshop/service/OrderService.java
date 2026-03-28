@@ -25,8 +25,12 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
     private final CouponRepository couponRepository;
     private final UserRepository userRepository;
+    private final FlashSaleService flashSaleService;
+    private final LoyaltyService loyaltyService;
+    private final InventoryService inventoryService;
 
     private static final Set<String> ALLOWED_SORT = Set.of("createdAt", "updatedAt", "totalAmount", "status");
 
@@ -43,26 +47,33 @@ public class OrderService {
         // Validate stock for all items first
         for (CartItem item : cartItems) {
             Product product = item.getProduct();
-            if (product.getStock() < item.getQuantity()) {
+            ProductVariant variant = item.getVariant();
+            int available = variant != null ? variant.getStock() : product.getStock();
+            if (available < item.getQuantity()) {
                 throw new BadRequestException(
                         "Insufficient stock for product: " + product.getName()
-                                + ". Available: " + product.getStock());
+                                + ". Available: " + available);
             }
         }
 
-        // Calculate total
-        BigDecimal total = cartItems.stream()
-                .map(i -> i.getProduct().getEffectivePrice().multiply(BigDecimal.valueOf(i.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Calculate total — apply flash price if active
+        BigDecimal total = BigDecimal.ZERO;
+        for (CartItem item : cartItems) {
+            BigDecimal base = item.getProduct().getEffectivePrice();
+            BigDecimal flashPrice = flashSaleService.getFlashPrice(item.getProduct().getId(), base);
+            BigDecimal unitPrice = flashPrice != null ? flashPrice : base;
+            total = total.add(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
+        }
 
         // Validate coupon if provided
+        final BigDecimal orderTotal = total;
         Coupon coupon = null;
         BigDecimal discountAmount = BigDecimal.ZERO;
         if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
             coupon = couponRepository.findByCode(req.getCouponCode().toUpperCase())
-                    .filter(c -> c.isValid(total))
+                    .filter(c -> c.isValid(orderTotal))
                     .orElseThrow(() -> new BadRequestException("Invalid or expired coupon"));
-            discountAmount = coupon.calculateDiscount(total);
+            discountAmount = coupon.calculateDiscount(orderTotal);
         }
 
         // Build order
@@ -79,15 +90,26 @@ public class OrderService {
         // Build order items + decrement stock
         for (CartItem item : cartItems) {
             Product product = item.getProduct();
+            ProductVariant variant = item.getVariant();
+            BigDecimal base = product.getEffectivePrice();
+            BigDecimal flashPrice = flashSaleService.getFlashPrice(product.getId(), base);
+            BigDecimal unitPrice = flashPrice != null ? flashPrice : base;
+
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .product(product)
                     .quantity(item.getQuantity())
-                    .price(product.getEffectivePrice())
+                    .price(unitPrice)
                     .size(item.getSize())
                     .color(item.getColor())
                     .build();
             order.getItems().add(orderItem);
+
+            // Deduct stock from variant or product
+            if (variant != null) {
+                variant.setStock(variant.getStock() - item.getQuantity());
+                productVariantRepository.save(variant);
+            }
             product.setStock(product.getStock() - item.getQuantity());
             productRepository.save(product);
         }
@@ -99,6 +121,16 @@ public class OrderService {
         }
 
         Order saved = orderRepository.save(order);
+
+        // Award loyalty points
+        loyaltyService.earnFromOrder(user, saved);
+
+        // Record stock movements
+        for (CartItem item : cartItems) {
+            inventoryService.recordMovement(item.getProduct(), item.getVariant(),
+                    -item.getQuantity(), StockMovement.Type.ORDER,
+                    "Order #" + saved.getId(), user);
+        }
 
         // Clear cart
         cartItemRepository.deleteByUserId(userId);
@@ -154,6 +186,8 @@ public class OrderService {
         Order.Status newStatus = Order.Status.valueOf(req.getStatus().toUpperCase());
         validateStatusTransition(order.getStatus(), newStatus);
         order.setStatus(newStatus);
+        if (req.getTrackingNumber() != null) order.setTrackingNumber(req.getTrackingNumber());
+        if (req.getEstimatedDelivery() != null) order.setEstimatedDelivery(req.getEstimatedDelivery());
         return OrderResponse.from(orderRepository.save(order));
     }
 
@@ -171,6 +205,9 @@ public class OrderService {
             Product product = item.getProduct();
             product.setStock(product.getStock() + item.getQuantity());
             productRepository.save(product);
+            inventoryService.recordMovement(product, null,
+                    item.getQuantity(), StockMovement.Type.CANCEL,
+                    "Cancel Order #" + order.getId(), null);
         }
 
         // Decrement coupon usage if applicable

@@ -115,9 +115,16 @@ const api = {
     delete: (id) => apiFetch(`/categories/${id}`, { method: 'DELETE' }),
     toggleStatus: (id) => apiFetch(`/categories/${id}/status`, { method: 'PATCH' }),
   },
+  variants: {
+    list: (productId) => apiFetch(`/products/${productId}/variants`),
+    create: (productId, data) => apiFetch(`/products/${productId}/variants`, { method: 'POST', body: JSON.stringify(data) }),
+    update: (productId, variantId, data) => apiFetch(`/products/${productId}/variants/${variantId}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (productId, variantId) => apiFetch(`/products/${productId}/variants/${variantId}`, { method: 'DELETE' }),
+    adjustStock: (productId, variantId, quantity) => apiFetch(`/products/${productId}/variants/${variantId}/stock`, { method: 'PATCH', body: JSON.stringify({ quantity }) }),
+  },
   cart: {
     get: () => apiFetch('/cart'),
-    addItem: (productId, quantity, size, color) => apiFetch('/cart/items', { method: 'POST', body: JSON.stringify({ productId, quantity, size, color }) }),
+    addItem: (productId, quantity, size, color, variantId) => apiFetch('/cart/items', { method: 'POST', body: JSON.stringify({ productId, quantity, size, color, variantId }) }),
     updateItem: (itemId, quantity) => apiFetch(`/cart/items/${itemId}`, { method: 'PUT', body: JSON.stringify({ quantity }) }),
     removeItem: (itemId) => apiFetch(`/cart/items/${itemId}`, { method: 'DELETE' }),
     clear: () => apiFetch('/cart', { method: 'DELETE' }),
@@ -128,7 +135,7 @@ const api = {
     get: (id) => apiFetch(`/orders/${id}`),
     cancel: (id) => apiFetch(`/orders/${id}/cancel`, { method: 'POST' }),
     adminList: (params = {}) => apiFetch(`/orders/admin/all?${new URLSearchParams(params)}`),
-    adminUpdateStatus: (id, status) => apiFetch(`/orders/admin/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    adminUpdateStatus: (id, data) => apiFetch(`/orders/admin/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
   },
   reviews: {
     getByProduct: (productId) => apiFetch(`/reviews/product/${productId}`),
@@ -163,6 +170,29 @@ const api = {
   ai: {
     chat: (message) => apiFetch('/ai/chat', { method: 'POST', body: JSON.stringify({ message }) }),
     recommendations: (preferences, budget) => apiFetch(`/ai/recommendations?preferences=${encodeURIComponent(preferences)}&budget=${budget}`),
+  },
+  flashSales: {
+    getActive: () => apiFetch('/flash-sales/active'),
+    getById: (id) => apiFetch(`/flash-sales/${id}`),
+    adminList: (params = {}) => apiFetch(`/admin/flash-sales?${new URLSearchParams(params)}`),
+    create: (data) => apiFetch('/admin/flash-sales', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => apiFetch(`/admin/flash-sales/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => apiFetch(`/admin/flash-sales/${id}`, { method: 'DELETE' }),
+    addProduct: (id, productId, stockLimit) => apiFetch(`/admin/flash-sales/${id}/products`, { method: 'POST', body: JSON.stringify({ productId, stockLimit }) }),
+    removeProduct: (id, productId) => apiFetch(`/admin/flash-sales/${id}/products/${productId}`, { method: 'DELETE' }),
+  },
+  wishlist: {
+    get: () => apiFetch('/wishlist'),
+    toggle: (productId) => apiFetch(`/wishlist/${productId}`, { method: 'POST' }),
+    check: (productId) => apiFetch(`/wishlist/check/${productId}`),
+  },
+  loyalty: {
+    getSummary: () => apiFetch('/loyalty'),
+    getReferralCode: () => apiFetch('/loyalty/referral-code'),
+  },
+  inventory: {
+    getMovements: (productId, params = {}) => apiFetch(`/admin/inventory/products/${productId}/movements?${new URLSearchParams(params)}`),
+    adjust: (data) => apiFetch('/admin/inventory/adjust', { method: 'POST', body: JSON.stringify(data) }),
   },
 };
 
@@ -231,9 +261,12 @@ function renderNavActions() {
   if (isLoggedIn) {
     navActions.innerHTML = `
       ${isAdmin ? `<a href="/admin/dashboard.html" class="nav-link admin-link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></rect></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         Admin
       </a>` : ''}
+      <a href="/wishlist.html" class="nav-link" title="Yêu thích">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </a>
       <a href="/profile.html" class="nav-link user-link">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         ${user?.name || 'Tài khoản'}

@@ -53,6 +53,10 @@ public class Product extends BaseEntity {
     @Builder.Default
     private List<ProductImage> images = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductVariant> variants = new ArrayList<>();
+
     public BigDecimal getEffectivePrice() {
         return salePrice != null ? salePrice : price;
     }

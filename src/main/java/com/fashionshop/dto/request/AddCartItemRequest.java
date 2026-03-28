@@ -13,6 +13,7 @@ public class AddCartItemRequest {
     @Min(value = 1, message = "Quantity must be at least 1")
     private int quantity = 1;
 
+    private Long variantId;
     private String size;
     private String color;
 }

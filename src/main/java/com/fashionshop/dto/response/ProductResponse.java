@@ -23,10 +23,12 @@ public class ProductResponse {
     private String aiDescription;
     private BigDecimal price;
     private BigDecimal salePrice;
+    private BigDecimal flashPrice;
     private Integer stock;
     private String status;
     private CategoryResponse category;
     private List<ProductImageResponse> images;
+    private List<ProductVariantResponse> variants;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -43,6 +45,7 @@ public class ProductResponse {
                 .status(p.getStatus().name())
                 .category(p.getCategory() != null ? CategoryResponse.from(p.getCategory()) : null)
                 .images(p.getImages().stream().map(ProductImageResponse::from).toList())
+                .variants(p.getVariants().stream().map(ProductVariantResponse::from).toList())
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
                 .build();

@@ -45,6 +45,13 @@ public class User extends BaseEntity {
     @Column(name = "refresh_token", length = 500)
     private String refreshToken;
 
+    @Column(name = "referral_code", length = 20, unique = true)
+    private String referralCode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "referred_by")
+    private User referredBy;
+
     public enum Role {
         ADMIN, USER
     }

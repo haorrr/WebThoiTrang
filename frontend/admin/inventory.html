@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tồn kho — Admin MAISON</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar__logo"><a href="../index.html">MAISON<span>.</span></a></div>
+    <nav class="admin-sidebar__nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="products.html">Sản phẩm</a>
+      <a href="categories.html">Danh mục</a>
+      <a href="orders.html">Đơn hàng</a>
+      <a href="flash-sales.html">Flash Sale</a>
+      <a href="coupons.html">Coupon</a>
+      <a href="users.html">Người dùng</a>
+      <a href="reviews.html">Đánh giá</a>
+      <a href="loyalty.html">Điểm thưởng</a>
+      <a href="inventory.html" class="active">Tồn kho</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1 class="admin-topbar__title">📦 Quản lý tồn kho</h1>
+    </div>
+
+    <div class="admin-content">
+      <!-- Adjust stock card -->
+      <div class="admin-card" style="margin-bottom:1.5rem">
+        <div class="admin-card__title">Điều chỉnh tồn kho thủ công</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:flex-end">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Tìm sản phẩm</label>
+            <input type="text" id="adjSearch" class="form-input" placeholder="Nhập tên sản phẩm..." oninput="debounceAdjSearch()">
+            <div id="adjSearchResults" style="position:relative"></div>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Biến thể (tùy chọn)</label>
+            <select class="form-select" id="adjVariant">
+              <option value="">— Không chọn —</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Số lượng (+ hoặc -)</label>
+            <input type="number" id="adjQty" class="form-input" placeholder="VD: 10 hoặc -5">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Ghi chú</label>
+            <input type="text" id="adjNote" class="form-input" placeholder="Lý do điều chỉnh">
+          </div>
+          <button class="btn btn-primary btn-sm" id="adjBtn" onclick="doAdjust()">Điều chỉnh</button>
+        </div>
+        <input type="hidden" id="adjProductId">
+      </div>
+
+      <!-- Movements log card -->
+      <div class="admin-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <div class="admin-card__title" style="margin:0">Lịch sử biến động tồn kho</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="text" id="movSearch" class="form-input" placeholder="Tìm sản phẩm..." style="width:200px" oninput="debounceMovSearch()">
+            <select class="form-select" id="movType" onchange="loadMovements()" style="width:160px">
+              <option value="">Tất cả loại</option>
+              <option value="ORDER">Đơn hàng</option>
+              <option value="CANCEL">Hủy đơn</option>
+              <option value="MANUAL_ADJUST">Điều chỉnh thủ công</option>
+              <option value="RESTOCK">Nhập thêm</option>
+            </select>
+          </div>
+        </div>
+        <div id="movList" class="table-wrap">
+          <div class="empty-state" style="padding:3rem">
+            <p style="color:var(--color-text-muted)">Chọn sản phẩm để xem lịch sử tồn kho.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/api.js?v=3"></script>
+<script>
+let adjSearchTimer, movSearchTimer;
+let movProductId = null;
+
+// ─── Adjust stock ─────────────────────────────────────────────
+function debounceAdjSearch() {
+  clearTimeout(adjSearchTimer);
+  adjSearchTimer = setTimeout(searchAdjProducts, 350);
+}
+
+async function searchAdjProducts() {
+  const q = document.getElementById('adjSearch').value.trim();
+  const resultsEl = document.getElementById('adjSearchResults');
+  if (!q) { resultsEl.innerHTML = ''; return; }
+  try {
+    const res = await api.products.list({ keyword: q, size: 8 });
+    const items = res.data?.content || [];
+    if (!items.length) { resultsEl.innerHTML = ''; return; }
+    resultsEl.innerHTML = `<div style="position:absolute;top:2px;left:0;right:0;background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.12);max-height:240px;overflow-y:auto">
+      ${items.map(p => `
+        <div onclick="selectAdjProduct(${p.id}, '${p.name.replace(/'/g,"\\'")}', ${p.stock})"
+          style="padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--color-border)"
+          onmouseover="this.style.background='var(--color-bg)'" onmouseout="this.style.background=''">
+          <img src="${p.primaryImageUrl || '../images/product-jacket.png'}" style="width:36px;height:44px;object-fit:cover;border-radius:4px">
+          <div><div style="font-weight:600;font-size:0.85rem">${p.name}</div><div style="font-size:0.75rem;color:var(--color-text-muted)">Tồn: ${p.stock}</div></div>
+        </div>`).join('')}
+    </div>`;
+  } catch {}
+}
+
+async function selectAdjProduct(id, name, stock) {
+  document.getElementById('adjProductId').value = id;
+  document.getElementById('adjSearch').value = name;
+  document.getElementById('adjSearchResults').innerHTML = '';
+  // Load variants
+  const varSel = document.getElementById('adjVariant');
+  varSel.innerHTML = '<option value="">— Không chọn —</option>';
+  try {
+    const res = await api.variants.list(id);
+    (res.data || []).forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id;
+      opt.textContent = [v.size, v.color].filter(Boolean).join(' / ') + ` (tồn: ${v.stock})`;
+      varSel.appendChild(opt);
+    });
+  } catch {}
+  // Also load movements for this product
+  movProductId = id;
+  document.getElementById('movSearch').value = name;
+  loadMovements();
+}
+
+async function doAdjust() {
+  const productId = document.getElementById('adjProductId').value;
+  const variantId = document.getElementById('adjVariant').value || null;
+  const qty = parseInt(document.getElementById('adjQty').value);
+  const note = document.getElementById('adjNote').value.trim();
+  if (!productId) { showToast('Chọn sản phẩm trước', 'error'); return; }
+  if (!qty || isNaN(qty)) { showToast('Nhập số lượng hợp lệ', 'error'); return; }
+  const btn = document.getElementById('adjBtn');
+  setLoading(btn, true);
+  try {
+    await api.inventory.adjust({ productId: parseInt(productId), variantId: variantId ? parseInt(variantId) : null, quantity: qty, note });
+    showToast(`Đã điều chỉnh ${qty > 0 ? '+' : ''}${qty} đơn vị`);
+    document.getElementById('adjQty').value = '';
+    document.getElementById('adjNote').value = '';
+    loadMovements();
+  } catch (e) { showToast(e.message || 'Lỗi điều chỉnh', 'error'); }
+  setLoading(btn, false);
+}
+
+// ─── Movements ────────────────────────────────────────────────
+function debounceMovSearch() {
+  clearTimeout(movSearchTimer);
+  movSearchTimer = setTimeout(async () => {
+    const q = document.getElementById('movSearch').value.trim();
+    if (!q) { movProductId = null; document.getElementById('movList').innerHTML = '<div class="empty-state" style="padding:3rem"><p style="color:var(--color-text-muted)">Chọn sản phẩm để xem lịch sử tồn kho.</p></div>'; return; }
+    const res = await api.products.list({ keyword: q, size: 1 });
+    const p = res.data?.content?.[0];
+    if (p) { movProductId = p.id; loadMovements(); }
+  }, 500);
+}
+
+const typeLabel = { ORDER: 'Đơn hàng', CANCEL: 'Hủy đơn', MANUAL_ADJUST: 'Thủ công', RESTOCK: 'Nhập kho' };
+const typeColor = { ORDER: '#DC2626', CANCEL: '#F97316', MANUAL_ADJUST: '#7C3AED', RESTOCK: '#16A34A' };
+
+async function loadMovements() {
+  if (!movProductId) return;
+  const el = document.getElementById('movList');
+  el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--color-text-muted)">Đang tải...</div>';
+  const type = document.getElementById('movType').value;
+  try {
+    const params = { size: 50 };
+    if (type) params.type = type;
+    const res = await api.inventory.getMovements(movProductId, params);
+    const items = res.data?.content || res.data || [];
+    if (!items.length) { el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--color-text-muted)">Không có biến động nào</div>'; return; }
+    el.innerHTML = `<table class="table">
+      <thead><tr><th>Loại</th><th>Số lượng</th><th>Biến thể</th><th>Tham chiếu</th><th>Ghi chú</th><th>Thời gian</th></tr></thead>
+      <tbody>${items.map(m => `
+        <tr>
+          <td><span style="padding:2px 8px;border-radius:12px;font-size:0.78rem;font-weight:600;background:${typeColor[m.type]}20;color:${typeColor[m.type]}">${typeLabel[m.type] || m.type}</span></td>
+          <td style="font-weight:700;color:${m.quantity > 0 ? '#16A34A' : '#DC2626'}">${m.quantity > 0 ? '+' : ''}${m.quantity}</td>
+          <td style="font-size:0.82rem">${m.variantId ? `Biến thể #${m.variantId}` : '—'}</td>
+          <td style="font-size:0.78rem;font-family:monospace">${m.reference || '—'}</td>
+          <td style="font-size:0.82rem">${m.note || m.createdBy || '—'}</td>
+          <td style="font-size:0.78rem;color:var(--color-text-muted)">${new Date(m.createdAt).toLocaleString('vi-VN')}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch (e) { el.innerHTML = `<div style="color:#DC2626;padding:1rem">Lỗi: ${e.message}</div>`; }
+}
+
+document.addEventListener('DOMContentLoaded', () => {});
+</script>
+</body>
+</html>

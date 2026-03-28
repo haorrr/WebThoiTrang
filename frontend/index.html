@@ -312,7 +312,8 @@
     </div>
   </footer>
 
-  <script src="js/api.js"></script>
+  <script src="js/api.js?v=3"></script>
+  <script src="js/quick-buy.js"></script>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
@@ -321,6 +322,31 @@
 
       // 2. Load Featured Products (Newest 4 products)
       const grid = document.getElementById('homeProductsGrid');
+      // Load flash sale banner
+      try {
+        const fsRes = await api.flashSales.getActive();
+        if (fsRes.success && fsRes.data?.length > 0) {
+          const fs = fsRes.data[0];
+          const endsAt = new Date(fs.endsAt).getTime();
+          const banner = document.createElement('div');
+          banner.id = 'flash-banner';
+          banner.style.cssText = 'background:linear-gradient(90deg,#DC2626,#F97316);color:#fff;text-align:center;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;';
+          banner.onclick = () => window.location.href = `flash-sale.html?id=${fs.id}`;
+          banner.innerHTML = `🔥 FLASH SALE — ${fs.name} — Giảm ${fs.discountPercent}% | <span id="fs-countdown"></span>`;
+          document.getElementById('navbar').after(banner);
+          // Countdown
+          setInterval(() => {
+            const diff = endsAt - Date.now();
+            if (diff <= 0) { banner.remove(); return; }
+            const h = Math.floor(diff/3600000);
+            const m = Math.floor((diff%3600000)/60000);
+            const s = Math.floor((diff%60000)/1000);
+            const el = document.getElementById('fs-countdown');
+            if (el) el.textContent = `Còn ${h}h ${m}m ${s}s`;
+          }, 1000);
+        }
+      } catch {}
+
       try {
         // Fetch latest 4 active products
         const res = await api.products.list({ page: 0, size: 4, sortBy: 'createdAt', sortDir: 'desc', status: 'ACTIVE' });
@@ -328,28 +354,24 @@
           const products = res.data.content || [];
           if (products.length > 0) {
             grid.innerHTML = products.map(p => {
-              const price = p.salePrice || p.price;
-              const hasDiscount = p.salePrice && p.salePrice < p.price;
-              const imgUrl = p.primaryImageUrl ||
-                             (p.images && p.images.find(i => i.primary || i.isPrimary)?.imageUrl) ||
-                             (p.images && p.images[0]?.imageUrl) ||
-                             'images/product-jacket.png';
-              // Check if new (less than 7 days)
+              const displayPrice = p.flashPrice || p.salePrice || p.price;
+              const hasDiscount = displayPrice < p.price;
+              const imgUrl = p.primaryImageUrl || 'images/product-jacket.png';
               const isNew = new Date() - new Date(p.createdAt) < 7 * 24 * 60 * 60 * 1000;
-              
+              const isFlash = !!p.flashPrice;
               return `
                 <div class="product-card reveal" onclick="window.location.href='product-detail.html?id=${p.id}'" style="cursor:pointer">
                   <div class="product-card__image">
                     <img src="${imgUrl}" alt="${p.name}" loading="lazy">
-                    ${isNew ? '<span class="product-card__badge">Mới</span>' : ''}
+                    ${isFlash ? '<span class="product-card__badge" style="background:linear-gradient(90deg,#DC2626,#F97316)">🔥 FLASH</span>' : (isNew ? '<span class="product-card__badge">Mới</span>' : '')}
                     ${p.stock === 0 ? '<span class="product-card__badge" style="background:#DC2626">Hết hàng</span>' : ''}
-                    <button class="product-card__quick-view" onclick="event.stopPropagation();window.location.href='product-detail.html?id=${p.id}'">Xem chi tiết</button>
+                    <button class="product-card__quick-view" onclick="event.stopPropagation();openQuickBuy(${p.id})">Mua nhanh</button>
                   </div>
                   <div class="product-card__info">
                     <span class="product-card__category">${p.categoryName || (p.category && p.category.name) || ''}</span>
                     <h3 class="product-card__name">${p.name}</h3>
                     <div class="product-card__price">
-                      <span class="current">${formatVND(price)}</span>
+                      <span class="current">${formatVND(displayPrice)}</span>
                       ${hasDiscount ? `<span class="original">${formatVND(p.price)}</span>` : ''}
                     </div>
                   </div>

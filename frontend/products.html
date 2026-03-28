@@ -107,7 +107,8 @@
   </div>
 </footer>
 
-<script src="js/api.js"></script>
+<script src="js/api.js?v=3"></script>
+<script src="js/quick-buy.js"></script>
 <script>
 let currentPage = 0;
 let currentFilters = {};
@@ -163,29 +164,60 @@ function getProductImageUrl(product) {
   return 'images/product-jacket.png';
 }
 
+// Wishlist state cache
+const wishlistIds = new Set();
+async function loadWishlistIds() {
+  if (!Auth.isLoggedIn()) return;
+  try {
+    const res = await api.wishlist.get();
+    if (res.success && res.data) {
+      res.data.forEach(p => wishlistIds.add(p.id));
+    }
+  } catch {}
+}
+
 function renderProductCard(p) {
-  const price = p.salePrice || p.price;
-  const hasDiscount = p.salePrice && p.salePrice < p.price;
+  const displayPrice = p.flashPrice || p.salePrice || p.price;
+  const origPrice = p.price;
+  const hasDiscount = displayPrice < origPrice;
   const imgUrl = getProductImageUrl(p);
   const isNew = new Date() - new Date(p.createdAt) < 7 * 24 * 60 * 60 * 1000;
+  const isWished = wishlistIds.has(p.id);
+  const isFlash = !!p.flashPrice;
   return `
     <div class="product-card reveal" onclick="window.location.href='product-detail.html?id=${p.id}'">
       <div class="product-card__image">
         <img src="${imgUrl}" alt="${p.name}" loading="lazy">
-        ${isNew ? '<span class="product-card__badge">Mới</span>' : ''}
+        ${isNew && !isFlash ? '<span class="product-card__badge">Mới</span>' : ''}
+        ${isFlash ? '<span class="product-card__badge" style="background:linear-gradient(90deg,#DC2626,#F97316)">🔥 FLASH</span>' : ''}
         ${p.stock === 0 ? '<span class="product-card__badge" style="background:#DC2626">Hết hàng</span>' : ''}
-        <button class="product-card__quick-view" onclick="event.stopPropagation();window.location.href='product-detail.html?id=${p.id}'">Xem chi tiết</button>
+        <button class="product-card__wish ${isWished ? 'active' : ''}" onclick="event.stopPropagation();toggleWishlist(event,${p.id})" title="Yêu thích">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <button class="product-card__quick-view" onclick="event.stopPropagation();openQuickBuy(${p.id})">Mua nhanh</button>
       </div>
       <div class="product-card__info">
-        <span class="product-card__category">${p.category?.name || ''}</span>
+        <span class="product-card__category">${p.categoryName || p.category?.name || ''}</span>
         <h3 class="product-card__name">${p.name}</h3>
         <div class="product-card__price">
-          <span class="current">${formatVND(price)}</span>
-          ${hasDiscount ? `<span class="original">${formatVND(p.price)}</span>` : ''}
+          <span class="current">${formatVND(displayPrice)}</span>
+          ${hasDiscount ? `<span class="original">${formatVND(origPrice)}</span>` : ''}
         </div>
       </div>
     </div>
   `;
+}
+
+async function toggleWishlist(event, productId) {
+  if (!Auth.isLoggedIn()) { window.location.href = '/login.html'; return; }
+  try {
+    const res = await api.wishlist.toggle(productId);
+    const wishlisted = res.data?.wishlisted;
+    if (wishlisted) wishlistIds.add(productId); else wishlistIds.delete(productId);
+    const btn = event.currentTarget;
+    btn.classList.toggle('active', wishlisted);
+    showToast(wishlisted ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích');
+  } catch {}
 }
 
 async function loadProducts() {
@@ -258,6 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNavActions();
   loadCategories();
   loadProducts();
+  loadWishlistIds();
 
   // Navbar scroll
   window.addEventListener('scroll', () => {

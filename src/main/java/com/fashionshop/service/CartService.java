@@ -6,11 +6,13 @@ import com.fashionshop.dto.response.CartItemResponse;
 import com.fashionshop.dto.response.CartResponse;
 import com.fashionshop.entity.CartItem;
 import com.fashionshop.entity.Product;
+import com.fashionshop.entity.ProductVariant;
 import com.fashionshop.entity.User;
 import com.fashionshop.exception.BadRequestException;
 import com.fashionshop.exception.ResourceNotFoundException;
 import com.fashionshop.repository.CartItemRepository;
 import com.fashionshop.repository.ProductRepository;
+import com.fashionshop.repository.ProductVariantRepository;
 import com.fashionshop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class CartService {
 
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final ProductVariantRepository variantRepository;
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
@@ -50,13 +53,22 @@ public class CartService {
                 .filter(p -> !p.isDeleted() && p.getStatus() == Product.Status.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", req.getProductId()));
 
-        if (product.getStock() < req.getQuantity()) {
+        // Validate stock — use variant stock if variantId provided
+        ProductVariant variant = null;
+        if (req.getVariantId() != null) {
+            variant = variantRepository.findById(req.getVariantId())
+                    .orElseThrow(() -> new ResourceNotFoundException("ProductVariant", req.getVariantId()));
+            if (variant.getStock() < req.getQuantity()) {
+                throw new BadRequestException("Insufficient stock for variant. Available: " + variant.getStock());
+            }
+        } else if (product.getStock() < req.getQuantity()) {
             throw new BadRequestException("Insufficient stock. Available: " + product.getStock());
         }
 
+        String size = variant != null ? variant.getSize() : req.getSize();
+        String color = variant != null ? variant.getColor() : req.getColor();
+
         // Check if same item already in cart
-        String size = req.getSize();
-        String color = req.getColor();
         cartItemRepository.findByUserIdAndProductIdAndSizeAndColor(userId, req.getProductId(), size, color)
                 .ifPresent(existing -> {
                     existing.setQuantity(existing.getQuantity() + req.getQuantity());
@@ -70,6 +82,7 @@ public class CartService {
         CartItem item = CartItem.builder()
                 .user(user)
                 .product(product)
+                .variant(variant)
                 .quantity(req.getQuantity())
                 .size(size)
                 .color(color)
