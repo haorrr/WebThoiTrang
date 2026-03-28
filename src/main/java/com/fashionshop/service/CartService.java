@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -29,15 +30,25 @@ public class CartService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository variantRepository;
     private final UserRepository userRepository;
+    private final FlashSaleService flashSaleService;
 
     @Transactional(readOnly = true)
     public CartResponse getCart(Long userId) {
         List<CartItem> items = cartItemRepository.findByUserId(userId);
-        List<CartItemResponse> responses = items.stream().map(CartItemResponse::from).toList();
+        Map<Long, FlashSaleService.FlashInfo> flashMap = flashSaleService.getActiveFlashInfoMap();
 
-        BigDecimal subtotal = items.stream()
-                .map(i -> i.getProduct().getEffectivePrice()
-                        .multiply(BigDecimal.valueOf(i.getQuantity())))
+        List<CartItemResponse> responses = items.stream().map(i -> {
+            CartItemResponse dto = CartItemResponse.from(i);
+            FlashSaleService.FlashInfo fi = flashMap.get(i.getProduct().getId());
+            if (fi != null) dto.setFlashPrice(fi.flashPrice());
+            return dto;
+        }).toList();
+
+        BigDecimal subtotal = responses.stream()
+                .map(r -> (r.getFlashPrice() != null ? r.getFlashPrice()
+                        : r.getSalePrice() != null ? r.getSalePrice()
+                        : r.getPrice())
+                        .multiply(BigDecimal.valueOf(r.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return CartResponse.builder()

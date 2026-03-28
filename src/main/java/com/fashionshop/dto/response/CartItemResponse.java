@@ -16,6 +16,7 @@ public class CartItemResponse {
     private String productSlug;
     private BigDecimal price;
     private BigDecimal salePrice;
+    private BigDecimal flashPrice;
     private Integer quantity;
     private String size;
     private String color;
