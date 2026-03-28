@@ -4,7 +4,9 @@
       "Bash(grep -E \"\\\\.\\(java|html|js\\)$\")",
       "Bash(/d/Desktop/WebThoiTrang/plans/20260328-scout/reports/scout-report.md:*)",
       "Bash(/tmp/report.txt:*)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(xargs cat:*)",
+      "Bash(grep -n \"formEl.style.display = ''none'';\" d:/Desktop/WebThoiTrang/frontend/product-detail.html)"
     ]
   }
 }

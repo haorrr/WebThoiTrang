@@ -331,9 +331,12 @@ async function loadReviews() {
 
   // Check canReview
   if (!Auth.isLoggedIn()) { formEl.style.display = 'none'; return; }
+  let canReview = false;
   try {
     const canRes = await api.reviews.canReview(productId);
-    if (canRes.success && canRes.data === true) {
+    canReview = canRes.success && canRes.data === true;
+  } catch { /* endpoint may not exist yet */ }
+  if (canReview) {
       formEl.innerHTML = `
         <div class="content-card" style="margin-top:1.5rem">
           <h3 class="content-card__title">Viết đánh giá</h3>
@@ -368,7 +371,6 @@ async function loadReviews() {
     } else {
       formEl.style.display = 'none';
     }
-  } catch { formEl.style.display = 'none'; }
 }
 
 const RATING_LABELS = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Xuất sắc'];
