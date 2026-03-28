@@ -15,13 +15,12 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     List<OrderItem> findByOrderId(Long orderId);
 
     @Query("""
-        SELECT COUNT(oi) > 0 FROM OrderItem oi
+        SELECT COUNT(oi) FROM OrderItem oi
         WHERE oi.order.user.id = :userId
           AND oi.product.id = :productId
           AND oi.order.status = :status
-          AND oi.order.deletedAt IS NULL
         """)
-    boolean existsByUserAndProductAndOrderStatus(
+    Long countByUserAndProductAndOrderStatus(
             @Param("userId") Long userId,
             @Param("productId") Long productId,
             @Param("status") Order.Status status);

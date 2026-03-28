@@ -61,7 +61,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public boolean canReview(Long userId, Long productId) {
         if (reviewRepository.existsByUserIdAndProductId(userId, productId)) return false;
-        return orderItemRepository.existsByUserAndProductAndOrderStatus(userId, productId, Order.Status.DELIVERED);
+        return orderItemRepository.countByUserAndProductAndOrderStatus(userId, productId, Order.Status.DELIVERED) > 0;
     }
 
     @Transactional
@@ -69,7 +69,7 @@ public class ReviewService {
         if (reviewRepository.existsByUserIdAndProductId(userId, req.getProductId())) {
             throw new BadRequestException("Bạn đã đánh giá sản phẩm này rồi");
         }
-        if (!orderItemRepository.existsByUserAndProductAndOrderStatus(userId, req.getProductId(), Order.Status.DELIVERED)) {
+        if (orderItemRepository.countByUserAndProductAndOrderStatus(userId, req.getProductId(), Order.Status.DELIVERED) == 0) {
             throw new BadRequestException("Bạn cần mua và nhận sản phẩm trước khi đánh giá");
         }
 
