@@ -23,6 +23,16 @@ public interface FlashSaleProductRepository extends JpaRepository<FlashSaleProdu
 
     Optional<FlashSaleProduct> findByFlashSaleIdAndProductId(Long flashSaleId, Long productId);
 
+    @Query("""
+        SELECT fsp FROM FlashSaleProduct fsp
+        JOIN FETCH fsp.flashSale fs
+        JOIN FETCH fsp.product p
+        WHERE fs.status = 'ACTIVE'
+          AND fs.deletedAt IS NULL
+          AND (fsp.stockLimit IS NULL OR fsp.soldCount < fsp.stockLimit)
+        """)
+    java.util.List<FlashSaleProduct> findAllActive();
+
     @Modifying
     @Query("UPDATE FlashSaleProduct fsp SET fsp.soldCount = fsp.soldCount + 1 WHERE fsp.id = :id")
     void incrementSoldCount(@Param("id") Long id);

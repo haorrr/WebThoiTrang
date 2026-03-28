@@ -6,7 +6,6 @@ import com.fashionshop.dto.response.ProductSummaryResponse;
 import com.fashionshop.entity.Category;
 import com.fashionshop.entity.Product;
 import com.fashionshop.entity.ProductImage;
-import com.fashionshop.exception.BadRequestException;
 import com.fashionshop.exception.ResourceNotFoundException;
 import com.fashionshop.repository.CategoryRepository;
 import com.fashionshop.repository.ProductImageRepository;
@@ -24,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -34,8 +35,10 @@ public class ProductService {
     private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
     private final CloudinaryService cloudinaryService;
+    private final FlashSaleService flashSaleService;
 
     private static final Set<String> ALLOWED_SORT = Set.of("price", "createdAt", "name", "stock");
+    private static final DateTimeFormatter ISO_FMT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Transactional(readOnly = true)
     public Page<ProductSummaryResponse> getProducts(String search, Long categoryId,
@@ -47,23 +50,43 @@ public class ProductService {
         Sort.Direction direction = "asc".equalsIgnoreCase(dir) ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
 
+        Map<Long, FlashSaleService.FlashInfo> flashMap = flashSaleService.getActiveFlashInfoMap();
+
         return productRepository
                 .findAll(ProductSpecification.withFilters(search, categoryId, minPrice, maxPrice, status), pageable)
-                .map(ProductSummaryResponse::from);
+                .map(p -> {
+                    ProductSummaryResponse dto = ProductSummaryResponse.from(p);
+                    FlashSaleService.FlashInfo fi = flashMap.get(p.getId());
+                    if (fi != null) {
+                        dto.setFlashPrice(fi.flashPrice());
+                        dto.setFlashEndsAt(fi.endsAt().format(ISO_FMT));
+                    }
+                    return dto;
+                });
     }
 
     @Transactional(readOnly = true)
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
-        return ProductResponse.from(product);
+        return enrichWithFlash(ProductResponse.from(product), product.getId());
     }
 
     @Transactional(readOnly = true)
     public ProductResponse getProductBySlug(String slug) {
         Product product = productRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "slug", slug));
-        return ProductResponse.from(product);
+        return enrichWithFlash(ProductResponse.from(product), product.getId());
+    }
+
+    private ProductResponse enrichWithFlash(ProductResponse dto, Long productId) {
+        Map<Long, FlashSaleService.FlashInfo> flashMap = flashSaleService.getActiveFlashInfoMap();
+        FlashSaleService.FlashInfo fi = flashMap.get(productId);
+        if (fi != null) {
+            dto.setFlashPrice(fi.flashPrice());
+            dto.setFlashEndsAt(fi.endsAt().format(ISO_FMT));
+        }
+        return dto;
     }
 
     @CacheEvict(value = "products", allEntries = true)

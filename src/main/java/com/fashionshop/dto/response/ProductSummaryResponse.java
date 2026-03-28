@@ -20,6 +20,7 @@ public class ProductSummaryResponse {
     private BigDecimal price;
     private BigDecimal salePrice;
     private BigDecimal flashPrice;
+    private String flashEndsAt;
     private Integer stock;
     private String status;
     private String primaryImageUrl;

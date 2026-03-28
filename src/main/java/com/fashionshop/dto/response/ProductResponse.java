@@ -24,6 +24,7 @@ public class ProductResponse {
     private BigDecimal price;
     private BigDecimal salePrice;
     private BigDecimal flashPrice;
+    private String flashEndsAt;
     private Integer stock;
     private String status;
     private CategoryResponse category;

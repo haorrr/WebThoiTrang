@@ -200,9 +200,10 @@ function renderProductCard(p) {
         <span class="product-card__category">${p.categoryName || p.category?.name || ''}</span>
         <h3 class="product-card__name">${p.name}</h3>
         <div class="product-card__price">
-          <span class="current">${formatVND(displayPrice)}</span>
+          <span class="current" style="${isFlash ? 'color:#DC2626' : ''}">${formatVND(displayPrice)}</span>
           ${hasDiscount ? `<span class="original">${formatVND(origPrice)}</span>` : ''}
         </div>
+        ${isFlash && p.flashEndsAt ? `<div class="flash-countdown" data-ends-at="${p.flashEndsAt}" style="font-size:0.72rem;color:#DC2626;font-weight:600;margin-top:4px">⏱ ...</div>` : ''}
       </div>
     </div>
   `;
@@ -253,6 +254,7 @@ async function loadProducts() {
           </div>`;
       } else {
         grid.innerHTML = content.map(renderProductCard).join('');
+        startFlashCountdowns();
         // Scroll reveal
         grid.querySelectorAll('.reveal').forEach((el, i) => setTimeout(() => el.classList.add('visible'), i * 60));
       }
@@ -306,6 +308,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Category radio auto-apply
   document.querySelectorAll('input[name="category"]').forEach(r => r.addEventListener('change', applyFilters));
 });
+
+function formatCountdown(diff) {
+  if (diff <= 0) return 'Đã kết thúc';
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `⏱ ${h > 0 ? h + 'g ' : ''}${String(m).padStart(2,'0')}p ${String(s).padStart(2,'0')}s`;
+}
+
+function startFlashCountdowns() {
+  document.querySelectorAll('.flash-countdown[data-ends-at]').forEach(el => {
+    const endsAt = new Date(el.dataset.endsAt).getTime();
+    function tick() {
+      el.textContent = formatCountdown(endsAt - Date.now());
+    }
+    tick();
+    const timer = setInterval(() => {
+      const diff = endsAt - Date.now();
+      el.textContent = formatCountdown(diff);
+      if (diff <= 0) clearInterval(timer);
+    }, 1000);
+  });
+}
 </script>
 </body>
 </html>

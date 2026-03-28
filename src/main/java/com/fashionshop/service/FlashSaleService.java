@@ -127,6 +127,26 @@ public class FlashSaleService {
         flashSaleProductRepository.delete(fsp);
     }
 
+    public record FlashInfo(BigDecimal flashPrice, LocalDateTime endsAt) {}
+
+    /** Batch fetch: map of productId → FlashInfo for all currently active flash sale products. */
+    @Transactional(readOnly = true)
+    public java.util.Map<Long, FlashInfo> getActiveFlashInfoMap() {
+        return flashSaleProductRepository.findAllActive().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        fsp -> fsp.getProduct().getId(),
+                        fsp -> {
+                            BigDecimal base = fsp.getProduct().getEffectivePrice();
+                            BigDecimal discount = fsp.getFlashSale().getDiscountPercent()
+                                    .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                            BigDecimal fp = base.multiply(BigDecimal.ONE.subtract(discount))
+                                    .setScale(0, RoundingMode.HALF_UP);
+                            return new FlashInfo(fp, fsp.getFlashSale().getEndsAt());
+                        },
+                        (a, b) -> a
+                ));
+    }
+
     // Compute flash price for a product — returns null if no active flash sale
     @Transactional(readOnly = true)
     public BigDecimal getFlashPrice(Long productId, BigDecimal basePrice) {

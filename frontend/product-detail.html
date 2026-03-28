@@ -123,7 +123,10 @@ function renderProduct(p) {
     <div>
       <span class="section-label">${p.category?.name || ''}</span>
       <h1 class="product-title">${p.name}</h1>
-      ${p.flashPrice ? `<div style="margin-bottom:6px"><span class="product-card__flash">🔥 FLASH SALE</span></div>` : ''}
+      ${p.flashPrice ? `<div style="margin-bottom:6px;display:flex;align-items:center;gap:10px">
+        <span class="product-card__flash">🔥 FLASH SALE</span>
+        ${p.flashEndsAt ? `<span id="flashCountdown" data-ends-at="${p.flashEndsAt}" style="font-size:0.85rem;font-weight:700;color:#DC2626;background:#FEF2F2;padding:3px 10px;border-radius:20px">⏱ ...</span>` : ''}
+      </div>` : ''}
       <div class="product-price-row">
         <span class="product-price" style="${p.flashPrice ? 'color:#DC2626' : ''}">${formatVND(displayPrice)}</span>
         ${hasDiscount ? `<span class="product-price-original">${formatVND(origPrice)}</span>` : ''}
@@ -345,6 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await api.products.get(productId);
     if (res.success && res.data) {
       renderProduct(res.data);
+      startFlashCountdown();
       loadReviews();
       checkWishlistStatus();
     }
@@ -352,6 +356,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('productContent').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><h3>Không tìm thấy sản phẩm</h3><p><a href="products.html">Quay lại</a></p></div>`;
   }
 });
+
+function startFlashCountdown() {
+  const el = document.getElementById('flashCountdown');
+  if (!el) return;
+  const endsAt = new Date(el.dataset.endsAt).getTime();
+  function tick() {
+    const diff = endsAt - Date.now();
+    if (diff <= 0) { el.textContent = 'Đã kết thúc'; clearInterval(timer); return; }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = `⏱ ${h > 0 ? h + 'g ' : ''}${String(m).padStart(2,'0')}p ${String(s).padStart(2,'0')}s`;
+  }
+  tick();
+  const timer = setInterval(tick, 1000);
+}
 </script>
 </body>
 </html>
