@@ -151,7 +151,7 @@ async function loadLoyalty() {
     const typeLabel = { EARNED: 'Tích lũy', REDEEMED: 'Đổi điểm', REFERRAL_BONUS: 'Giới thiệu', EXPIRED: 'Hết hạn' };
     const history = s.history || [];
     container.innerHTML = `
-      <div style="text-align:center;padding:1.5rem;background:linear-gradient(135deg,#7C3AED,#4F46E5);border-radius:12px;color:#fff;margin-bottom:1.5rem">
+      <div style="text-align:center;padding:1.5rem;background:linear-gradient(135deg,#CA8A04,#92400E);border-radius:12px;color:#fff;margin-bottom:1.5rem">
         <div style="font-size:3rem;font-weight:700;line-height:1">${s.totalPoints.toLocaleString('vi-VN')}</div>
         <div style="font-size:0.9rem;opacity:0.85;margin-top:4px">điểm tích lũy</div>
         <div style="font-size:1.1rem;font-weight:600;margin-top:8px">${formatVND(s.totalPoints * 1000)}</div>

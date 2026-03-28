@@ -189,6 +189,10 @@ const api = {
   loyalty: {
     getSummary: () => apiFetch('/loyalty'),
     getReferralCode: () => apiFetch('/loyalty/referral-code'),
+    adminListUsers: (params = {}) => apiFetch('/loyalty/admin/users?' + new URLSearchParams(params)),
+    adminGetConfig: () => apiFetch('/loyalty/admin/config'),
+    adminUpdateConfig: (data) => apiFetch('/loyalty/admin/config', { method: 'PUT', body: JSON.stringify(data) }),
+    adminAdjustPoints: (userId, data) => apiFetch(`/loyalty/admin/adjust/${userId}`, { method: 'POST', body: JSON.stringify(data) }),
   },
   inventory: {
     getMovements: (productId, params = {}) => apiFetch(`/admin/inventory/products/${productId}/movements?${new URLSearchParams(params)}`),

@@ -19,6 +19,8 @@ public class OrderResponse {
     private String status;
     private BigDecimal totalAmount;
     private BigDecimal discountAmount;
+    private BigDecimal pointsDiscountAmount;
+    private Integer pointsRedeemed;
     private BigDecimal finalAmount;
     private String shippingAddress;
     private String paymentMethod;
@@ -38,7 +40,9 @@ public class OrderResponse {
                 .status(o.getStatus().name())
                 .totalAmount(o.getTotalAmount())
                 .discountAmount(o.getDiscountAmount())
-                .finalAmount(o.getTotalAmount().subtract(o.getDiscountAmount()))
+                .pointsDiscountAmount(o.getPointsDiscountAmount())
+                .pointsRedeemed(o.getPointsRedeemed())
+                .finalAmount(o.getTotalAmount().subtract(o.getDiscountAmount()).subtract(o.getPointsDiscountAmount()))
                 .shippingAddress(o.getShippingAddress())
                 .paymentMethod(o.getPaymentMethod())
                 .couponCode(o.getCoupon() != null ? o.getCoupon().getCode() : null)

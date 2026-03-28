@@ -46,6 +46,14 @@ public class Order extends BaseEntity {
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
+    @Column(name = "points_discount_amount", nullable = false, precision = 15, scale = 2)
+    @Builder.Default
+    private BigDecimal pointsDiscountAmount = BigDecimal.ZERO;
+
+    @Column(name = "points_redeemed", nullable = false)
+    @Builder.Default
+    private Integer pointsRedeemed = 0;
+
     @Column(columnDefinition = "TEXT")
     private String notes;
 

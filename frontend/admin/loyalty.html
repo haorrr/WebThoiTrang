@@ -28,74 +28,170 @@
   <div class="sidebar-footer"><button class="btn btn-outline btn-sm" style="width:100%;color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.2)" onclick="handleLogout()">Đăng xuất</button></div>
 </aside>
 
-<!-- Main -->
 <main class="admin-main">
-    <div class="admin-topbar">
-      <h1 class="admin-topbar__title">🎁 Chương trình điểm thưởng</h1>
-    </div>
+  <div class="admin-topbar">
+    <h1 class="admin-topbar__title">🎁 Chương trình điểm thưởng</h1>
+  </div>
 
-    <div class="admin-content">
-      <!-- Rules overview -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
-        <div class="admin-card" style="text-align:center;padding:1.5rem">
-          <div style="font-size:2rem;margin-bottom:8px">🛍️</div>
-          <div style="font-size:1.5rem;font-weight:700;color:var(--color-cta)">1 điểm</div>
-          <div style="font-size:0.85rem;color:var(--color-text-muted);margin-top:4px">mỗi 10.000 VND chi tiêu</div>
-        </div>
-        <div class="admin-card" style="text-align:center;padding:1.5rem">
-          <div style="font-size:2rem;margin-bottom:8px">💰</div>
-          <div style="font-size:1.5rem;font-weight:700;color:#16A34A">1.000 VND</div>
-          <div style="font-size:0.85rem;color:var(--color-text-muted);margin-top:4px">giá trị mỗi 1 điểm khi đổi</div>
-        </div>
-        <div class="admin-card" style="text-align:center;padding:1.5rem">
-          <div style="font-size:2rem;margin-bottom:8px">🤝</div>
-          <div style="font-size:1.5rem;font-weight:700;color:#7C3AED">50 điểm</div>
-          <div style="font-size:0.85rem;color:var(--color-text-muted);margin-top:4px">thưởng giới thiệu thành công</div>
-        </div>
+  <div class="admin-content">
+
+    <!-- Config settings card -->
+    <div class="admin-card" style="margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div class="admin-card__title" style="margin:0">⚙️ Cấu hình tích điểm</div>
+        <button class="btn btn-primary btn-sm" id="saveConfigBtn" onclick="saveConfig()">Lưu cài đặt</button>
       </div>
-
-      <!-- User lookup -->
-      <div class="admin-card" style="margin-bottom:1.5rem">
-        <div class="admin-card__title">Tra cứu điểm thưởng theo người dùng</div>
-        <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:1rem">
-          <div class="form-group" style="margin:0;flex:1;max-width:360px">
-            <label class="form-label">Email người dùng</label>
-            <input type="email" id="lookupEmail" class="form-input" placeholder="user@example.com">
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="lookupUser()">Tra cứu</button>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Chi tiêu (VND) để được 1 điểm</label>
+          <input type="number" id="cfgSpend" class="form-input" min="1000" step="1000" placeholder="10000">
+          <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:4px">Mặc định: 10.000 VND = 1 điểm</div>
         </div>
-        <div id="lookupResult"></div>
-      </div>
-
-      <!-- Loyalty type legend -->
-      <div class="admin-card">
-        <div class="admin-card__title">Các loại giao dịch điểm</div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
-            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#16A34A20;color:#16A34A">EARNED</span>
-            <span style="font-size:0.85rem">Điểm tích lũy từ đơn hàng hoàn thành</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
-            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#DC262620;color:#DC2626">REDEEMED</span>
-            <span style="font-size:0.85rem">Điểm đã dùng để thanh toán đơn hàng</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
-            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#7C3AED20;color:#7C3AED">REFERRAL_BONUS</span>
-            <span style="font-size:0.85rem">Điểm thưởng từ chương trình giới thiệu</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
-            <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#F9731620;color:#F97316">EXPIRED</span>
-            <span style="font-size:0.85rem">Điểm đã hết hạn (chưa sử dụng)</span>
-          </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Giá trị 1 điểm khi đổi (VND)</label>
+          <input type="number" id="cfgVnd" class="form-input" min="100" step="100" placeholder="1000">
+          <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:4px">Mặc định: 1 điểm = 1.000 VND</div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Điểm thưởng giới thiệu</label>
+          <input type="number" id="cfgReferral" class="form-input" min="0" placeholder="50">
+          <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:4px">Mặc định: 50 điểm/người</div>
         </div>
       </div>
     </div>
+
+    <!-- User lookup -->
+    <div class="admin-card" style="margin-bottom:1.5rem">
+      <div class="admin-card__title">Tra cứu & điều chỉnh điểm theo người dùng</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:1rem">
+        <div class="form-group" style="margin:0;flex:1;max-width:360px">
+          <label class="form-label">Email người dùng</label>
+          <input type="email" id="lookupEmail" class="form-input" placeholder="user@example.com">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="lookupUser()">Tra cứu</button>
+      </div>
+      <div id="lookupResult"></div>
+    </div>
+
+    <!-- User list with points -->
+    <div class="admin-card" style="margin-bottom:1.5rem">
+      <div class="admin-card__title">Danh sách người dùng & điểm thưởng</div>
+      <div id="userPointsList">
+        <div style="text-align:center;padding:2rem;color:var(--color-text-muted)">Đang tải...</div>
+      </div>
+    </div>
+
+    <!-- Transaction type legend -->
+    <div class="admin-card">
+      <div class="admin-card__title">Các loại giao dịch điểm</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+          <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#16A34A20;color:#16A34A">EARNED</span>
+          <span style="font-size:0.85rem">Điểm tích lũy từ đơn hàng hoàn thành</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+          <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#DC262620;color:#DC2626">REDEEMED</span>
+          <span style="font-size:0.85rem">Điểm đã dùng để thanh toán đơn hàng</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+          <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#7C3AED20;color:#7C3AED">REFERRAL_BONUS</span>
+          <span style="font-size:0.85rem">Điểm thưởng từ chương trình giới thiệu</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--color-bg);border-radius:8px;border:1px solid var(--color-border)">
+          <span style="padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:600;background:#F9731620;color:#F97316">EXPIRED</span>
+          <span style="font-size:0.85rem">Điểm đã hết hạn (chưa sử dụng)</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
-<script src="../js/api.js?v=3"></script>
+<!-- Adjust points modal -->
+<div class="modal-overlay" id="adjustModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal__header">
+      <h3>Điều chỉnh điểm thưởng</h3>
+      <button class="modal__close" onclick="closeAdjustModal()">✕</button>
+    </div>
+    <div class="modal__body">
+      <input type="hidden" id="adjUserId">
+      <div class="form-group">
+        <label class="form-label">Người dùng</label>
+        <input type="text" id="adjUserName" class="form-input" disabled>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Số điểm (+ để cộng, - để trừ)</label>
+        <input type="number" id="adjPoints" class="form-input" placeholder="VD: 100 hoặc -50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lý do</label>
+        <input type="text" id="adjReason" class="form-input" placeholder="VD: Bù điểm đơn hàng bị lỗi">
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="btn btn-outline btn-sm" onclick="closeAdjustModal()">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="adjSaveBtn" onclick="doAdjustPoints()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js?v=4"></script>
 <script>
 const typeColor = { EARNED: '#16A34A', REDEEMED: '#DC2626', REFERRAL_BONUS: '#7C3AED', EXPIRED: '#F97316' };
 const typeLabel = { EARNED: 'Tích lũy', REDEEMED: 'Đổi điểm', REFERRAL_BONUS: 'Giới thiệu', EXPIRED: 'Hết hạn' };
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!Auth.isLoggedIn() || !Auth.isAdmin()) { window.location.href = '../login.html'; return; }
+  document.getElementById('sidebarUserName').textContent = Auth.getUser()?.name || 'Admin';
+  loadConfig();
+  loadUserPoints();
+});
+
+async function loadConfig() {
+  try {
+    const res = await api.loyalty.adminGetConfig();
+    if (res.success && res.data) {
+      document.getElementById('cfgSpend').value    = res.data.spendPerPoint;
+      document.getElementById('cfgVnd').value      = res.data.vndPerPoint;
+      document.getElementById('cfgReferral').value = res.data.referralBonus;
+    }
+  } catch {}
+}
+
+async function saveConfig() {
+  const btn = document.getElementById('saveConfigBtn');
+  setLoading(btn, true);
+  try {
+    await api.loyalty.adminUpdateConfig({
+      spendPerPoint: parseInt(document.getElementById('cfgSpend').value),
+      vndPerPoint:   parseInt(document.getElementById('cfgVnd').value),
+      referralBonus: parseInt(document.getElementById('cfgReferral').value),
+    });
+    showToast('Đã lưu cấu hình điểm thưởng');
+  } catch (e) { showToast(e.message || 'Lỗi lưu cấu hình', 'error'); }
+  setLoading(btn, false);
+}
+
+async function loadUserPoints() {
+  const el = document.getElementById('userPointsList');
+  try {
+    const res = await api.loyalty.adminListUsers({ page: 0, size: 50 });
+    const users = res.data || [];
+    if (!users.length) { el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--color-text-muted)">Chưa có dữ liệu điểm thưởng</div>'; return; }
+    el.innerHTML = `<table class="table">
+      <thead><tr><th>Người dùng</th><th>Email</th><th style="text-align:right">Điểm hiện có</th><th style="text-align:right">Giá trị</th><th></th></tr></thead>
+      <tbody>${users.map(u => `
+        <tr>
+          <td style="font-weight:600">${u.name}</td>
+          <td style="color:var(--color-text-muted);font-size:0.85rem">${u.email}</td>
+          <td style="text-align:right;font-weight:700;color:var(--color-cta)">${u.totalPoints.toLocaleString('vi-VN')} điểm</td>
+          <td style="text-align:right;font-size:0.85rem;color:var(--color-text-muted)">≈ ${formatVND(u.totalPoints * 1000)}</td>
+          <td><button class="btn btn-outline btn-xs" onclick="openAdjustModal(${u.userId}, '${u.name.replace(/'/g,"\\'")}')">Điều chỉnh</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } catch (e) { el.innerHTML = `<div style="color:#DC2626;padding:1rem">Lỗi tải danh sách: ${e.message}</div>`; }
+}
 
 async function lookupUser() {
   const email = document.getElementById('lookupEmail').value.trim();
@@ -103,14 +199,10 @@ async function lookupUser() {
   const el = document.getElementById('lookupResult');
   el.innerHTML = '<div style="color:var(--color-text-muted);font-size:0.85rem">Đang tìm kiếm...</div>';
   try {
-    // Find user by searching users list
     const res = await api.users.list({ search: email, size: 5 });
     const users = res.data?.content || [];
     const user = users.find(u => u.email === email);
-    if (!user) {
-      el.innerHTML = '<div style="color:#DC2626;font-size:0.85rem">Không tìm thấy người dùng với email này.</div>';
-      return;
-    }
+    if (!user) { el.innerHTML = '<div style="color:#DC2626;font-size:0.85rem">Không tìm thấy người dùng với email này.</div>'; return; }
     el.innerHTML = `
       <div style="border:1px solid var(--color-border);border-radius:10px;overflow:hidden">
         <div style="padding:14px 18px;background:var(--color-bg);border-bottom:1px solid var(--color-border);display:flex;gap:16px;align-items:center">
@@ -123,20 +215,43 @@ async function lookupUser() {
             <div style="font-size:1.4rem;font-weight:700;color:var(--color-cta)">${user.loyaltyPoints} điểm</div>
             <div style="font-size:0.75rem;color:var(--color-text-muted)">≈ ${formatVND(user.loyaltyPoints * 1000)}</div>
           </div>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="openAdjustModal(${user.id}, '${(user.name||'').replace(/'/g,"\\'")}')">Điều chỉnh</button>
         </div>
         <div style="padding:10px 18px;font-size:0.82rem;color:var(--color-text-muted)">
           Mã giới thiệu: <strong>${user.referralCode || '—'}</strong>
-          ${user.referredBy ? ` · Được giới thiệu bởi: <strong>#${user.referredById}</strong>` : ''}
           · Thành viên từ: ${new Date(user.createdAt).toLocaleDateString('vi-VN')}
         </div>
       </div>`;
-  } catch (e) {
-    el.innerHTML = `<div style="color:#DC2626;font-size:0.85rem">Lỗi: ${e.message}</div>`;
-  }
+  } catch (e) { el.innerHTML = `<div style="color:#DC2626;font-size:0.85rem">Lỗi: ${e.message}</div>`; }
+}
+
+function openAdjustModal(userId, userName) {
+  document.getElementById('adjUserId').value = userId;
+  document.getElementById('adjUserName').value = userName;
+  document.getElementById('adjPoints').value = '';
+  document.getElementById('adjReason').value = '';
+  document.getElementById('adjustModal').classList.add('open');
+}
+
+function closeAdjustModal() { document.getElementById('adjustModal').classList.remove('open'); }
+
+async function doAdjustPoints() {
+  const userId = document.getElementById('adjUserId').value;
+  const points = parseInt(document.getElementById('adjPoints').value);
+  const reason = document.getElementById('adjReason').value.trim();
+  if (!points || isNaN(points)) { showToast('Nhập số điểm hợp lệ', 'error'); return; }
+  const btn = document.getElementById('adjSaveBtn');
+  setLoading(btn, true);
+  try {
+    await api.loyalty.adminAdjustPoints(userId, { points, reason });
+    showToast(`Đã ${points > 0 ? 'cộng' : 'trừ'} ${Math.abs(points)} điểm`);
+    closeAdjustModal();
+    loadUserPoints();
+  } catch (e) { showToast(e.message || 'Lỗi điều chỉnh điểm', 'error'); }
+  setLoading(btn, false);
 }
 
 document.getElementById('lookupEmail').addEventListener('keydown', e => { if (e.key === 'Enter') lookupUser(); });
-document.addEventListener('DOMContentLoaded', () => {});
 </script>
 </body>
 </html>

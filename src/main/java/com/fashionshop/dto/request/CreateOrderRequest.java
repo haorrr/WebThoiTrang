@@ -12,4 +12,5 @@ public class CreateOrderRequest {
     private String paymentMethod = "COD";
     private String couponCode;
     private String notes;
+    private Integer pointsToRedeem;
 }

@@ -76,11 +76,20 @@ public class OrderService {
             discountAmount = coupon.calculateDiscount(orderTotal);
         }
 
+        // Redeem loyalty points if requested
+        int pointsToRedeem = req.getPointsToRedeem() != null ? req.getPointsToRedeem() : 0;
+        BigDecimal pointsDiscount = BigDecimal.ZERO;
+        if (pointsToRedeem > 0) {
+            pointsDiscount = loyaltyService.redeem(userId, pointsToRedeem);
+        }
+
         // Build order
         Order order = Order.builder()
                 .user(user)
                 .totalAmount(total)
                 .discountAmount(discountAmount)
+                .pointsDiscountAmount(pointsDiscount)
+                .pointsRedeemed(pointsToRedeem)
                 .shippingAddress(req.getShippingAddress())
                 .paymentMethod(req.getPaymentMethod() != null ? req.getPaymentMethod() : "COD")
                 .coupon(coupon)
