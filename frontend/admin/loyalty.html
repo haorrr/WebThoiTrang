@@ -104,9 +104,10 @@ async function lookupUser() {
   el.innerHTML = '<div style="color:var(--color-text-muted);font-size:0.85rem">Đang tìm kiếm...</div>';
   try {
     // Find user by searching users list
-    const res = await api.users.list({ keyword: email, size: 1 });
-    const user = res.data?.content?.[0];
-    if (!user || user.email !== email) {
+    const res = await api.users.list({ search: email, size: 5 });
+    const users = res.data?.content || [];
+    const user = users.find(u => u.email === email);
+    if (!user) {
       el.innerHTML = '<div style="color:#DC2626;font-size:0.85rem">Không tìm thấy người dùng với email này.</div>';
       return;
     }
