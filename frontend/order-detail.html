@@ -90,15 +90,19 @@ function renderOrder(o) {
       </div>`;
 
   // Items
+  const isDelivered = o.status === 'DELIVERED';
   const itemsHtml = (o.items || []).map(item => `
     <div style="display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--color-border)">
       <img src="${item.imageUrl || 'images/product-jacket.png'}" alt="${item.productName}" style="width:64px;height:80px;object-fit:cover;border-radius:8px;background:#f5f5f4;flex-shrink:0">
       <div style="flex:1">
         <div style="font-weight:600;font-size:0.95rem;margin-bottom:4px">${item.productName}</div>
         <div style="font-size:0.8rem;color:var(--color-text-muted);margin-bottom:6px">${[item.size && `Size: ${item.size}`, item.color && `Màu: ${item.color}`].filter(Boolean).join(' · ')}</div>
-        <div style="display:flex;justify-content:space-between">
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:0.875rem;color:var(--color-text-muted)">× ${item.quantity}</span>
-          <span style="font-family:var(--font-heading);font-weight:700">${formatVND((item.salePrice || item.price) * item.quantity)}</span>
+          <div style="display:flex;align-items:center;gap:12px">
+            ${isDelivered ? `<a href="product-detail.html?id=${item.productId}#reviews" style="font-size:0.8rem;color:var(--color-cta);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--color-cta);padding:3px 10px;border-radius:20px" onclick="sessionStorage.setItem('openReview','${item.productId}')">⭐ Đánh giá</a>` : ''}
+            <span style="font-family:var(--font-heading);font-weight:700">${formatVND((item.salePrice || item.price) * item.quantity)}</span>
+          </div>
         </div>
       </div>
     </div>

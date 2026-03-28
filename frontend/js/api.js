@@ -138,9 +138,21 @@ const api = {
     adminUpdateStatus: (id, data) => apiFetch(`/orders/admin/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
   },
   reviews: {
-    getByProduct: (productId) => apiFetch(`/reviews/product/${productId}`),
+    getByProduct: (productId, page = 0) => apiFetch(`/reviews/product/${productId}?page=${page}&size=10`),
     getMy: () => apiFetch('/reviews/my'),
+    canReview: (productId) => apiFetch(`/reviews/can-review/${productId}`),
     create: (data) => apiFetch('/reviews', { method: 'POST', body: JSON.stringify(data) }),
+    uploadImage: async (file) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      const token = Auth.getAccess();
+      const res = await fetch(API_BASE + '/reviews/upload-image', {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: fd,
+      });
+      return res.json();
+    },
     update: (id, data) => apiFetch(`/reviews/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id) => apiFetch(`/reviews/${id}`, { method: 'DELETE' }),
     adminList: (params = {}) => apiFetch(`/reviews/admin/all?${new URLSearchParams(params)}`),

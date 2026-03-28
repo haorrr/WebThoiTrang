@@ -5,6 +5,7 @@ import com.fashionshop.dto.request.CreateReviewRequest;
 import com.fashionshop.dto.request.UpdateReviewRequest;
 import com.fashionshop.dto.response.ReviewResponse;
 import com.fashionshop.repository.UserRepository;
+import com.fashionshop.service.CloudinaryService;
 import com.fashionshop.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -25,6 +29,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
 
     @GetMapping("/product/{productId}")
     @Operation(summary = "Get approved reviews for a product")
@@ -80,6 +85,25 @@ public class ReviewController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         reviewService.deleteReview(userId, id, isAdmin);
         return ResponseEntity.ok(ApiResponse.ok("Review deleted", null));
+    }
+
+    @GetMapping("/can-review/{productId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Check if current user can review this product")
+    public ResponseEntity<ApiResponse<Boolean>> canReview(
+            Authentication auth,
+            @PathVariable Long productId) {
+        Long userId = getCurrentUserId(auth);
+        return ResponseEntity.ok(ApiResponse.ok(reviewService.canReview(userId, productId)));
+    }
+
+    @PostMapping("/upload-image")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Upload a review image")
+    public ResponseEntity<ApiResponse<Map<String, String>>> uploadImage(
+            @RequestParam("file") MultipartFile file) {
+        String url = cloudinaryService.upload(file, "fashion-shop/reviews");
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("url", url)));
     }
 
     // Admin endpoints

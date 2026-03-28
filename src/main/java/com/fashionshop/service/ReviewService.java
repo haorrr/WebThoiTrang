@@ -3,11 +3,14 @@ package com.fashionshop.service;
 import com.fashionshop.dto.request.CreateReviewRequest;
 import com.fashionshop.dto.request.UpdateReviewRequest;
 import com.fashionshop.dto.response.ReviewResponse;
+import com.fashionshop.entity.Order;
 import com.fashionshop.entity.Product;
 import com.fashionshop.entity.Review;
+import com.fashionshop.entity.ReviewImage;
 import com.fashionshop.entity.User;
 import com.fashionshop.exception.BadRequestException;
 import com.fashionshop.exception.ResourceNotFoundException;
+import com.fashionshop.repository.OrderItemRepository;
 import com.fashionshop.repository.ProductRepository;
 import com.fashionshop.repository.ReviewRepository;
 import com.fashionshop.repository.UserRepository;
@@ -18,6 +21,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -25,6 +30,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final OrderItemRepository orderItemRepository;
 
     @Transactional(readOnly = true)
     public Page<ReviewResponse> getProductReviews(Long productId, boolean approvedOnly, int page, int size) {
@@ -52,10 +58,19 @@ public class ReviewService {
         return reviewRepository.findAll(pr).map(ReviewResponse::from);
     }
 
+    @Transactional(readOnly = true)
+    public boolean canReview(Long userId, Long productId) {
+        if (reviewRepository.existsByUserIdAndProductId(userId, productId)) return false;
+        return orderItemRepository.existsByUserAndProductAndOrderStatus(userId, productId, Order.Status.DELIVERED);
+    }
+
     @Transactional
     public ReviewResponse createReview(Long userId, CreateReviewRequest req) {
         if (reviewRepository.existsByUserIdAndProductId(userId, req.getProductId())) {
-            throw new BadRequestException("You have already reviewed this product");
+            throw new BadRequestException("Bạn đã đánh giá sản phẩm này rồi");
+        }
+        if (!orderItemRepository.existsByUserAndProductAndOrderStatus(userId, req.getProductId(), Order.Status.DELIVERED)) {
+            throw new BadRequestException("Bạn cần mua và nhận sản phẩm trước khi đánh giá");
         }
 
         Product product = productRepository.findById(req.getProductId())
@@ -71,6 +86,15 @@ public class ReviewService {
                 .rating(req.getRating())
                 .comment(req.getComment())
                 .build();
+
+        // Attach images
+        List<String> urls = req.getImageUrls();
+        if (urls != null) {
+            for (int i = 0; i < urls.size(); i++) {
+                review.getImages().add(ReviewImage.builder()
+                        .review(review).imageUrl(urls.get(i)).sortOrder(i).build());
+            }
+        }
 
         return ReviewResponse.from(reviewRepository.save(review));
     }

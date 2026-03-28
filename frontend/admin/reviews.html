@@ -42,7 +42,7 @@
       </div>
       <div class="table-responsive">
         <table class="data-table">
-          <thead><tr><th>Người dùng</th><th>Sản phẩm</th><th>Sao</th><th>Nhận xét</th><th>Ngày</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+          <thead><tr><th>Người dùng</th><th>Sản phẩm</th><th>Sao</th><th>Nhận xét</th><th>Ảnh</th><th>Ngày</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
           <tbody id="reviewsTable"></tbody>
         </table>
       </div>
@@ -75,10 +75,13 @@ async function loadReviews() {
       }
       tbody.innerHTML = reviews.map(r => `
         <tr>
-          <td style="font-size:0.875rem">${r.userName || r.userEmail || '—'}</td>
+          <td style="font-size:0.875rem">${r.userName || '—'}</td>
           <td style="font-size:0.82rem">${r.productName || `ID: ${r.productId}`}</td>
           <td><div class="stars-row">${renderStars(r.rating)}</div></td>
-          <td style="font-size:0.82rem;max-width:240px">${r.comment || ''}</td>
+          <td style="font-size:0.82rem;max-width:200px">${r.comment || ''}</td>
+          <td>
+            ${r.imageUrls?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${r.imageUrls.map(u=>`<img src="${u}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:zoom-in" onclick="window.open('${u}','_blank')">`).join('')}</div>` : '<span style="color:var(--color-text-muted)">—</span>'}
+          </td>
           <td style="font-size:0.78rem;color:var(--color-text-muted)">${formatDate(r.createdAt)}</td>
           <td>${getStatusBadge(r.status || 'PENDING')}</td>
           <td>

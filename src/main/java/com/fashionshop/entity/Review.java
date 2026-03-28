@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "reviews")
 @Where(clause = "deleted_at IS NULL")
@@ -32,6 +35,10 @@ public class Review extends BaseEntity {
     @Column(nullable = false, length = 20)
     @Builder.Default
     private Status status = Status.PENDING;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ReviewImage> images = new ArrayList<>();
 
     public enum Status {
         PENDING, APPROVED, REJECTED

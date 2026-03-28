@@ -57,6 +57,7 @@
   <!-- Reviews Section -->
   <div style="padding-bottom:4rem">
     <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1.5rem">Đánh giá sản phẩm</h2>
+    <div id="ratingSummary"></div>
     <div id="reviewsList"></div>
     <div id="reviewForm" style="display:none"></div>
   </div>
@@ -268,60 +269,172 @@ async function addToCart() {
   setLoading(btn, false);
 }
 
+let selectedRating = 0;
+let reviewImageUrls = [];
+
 async function loadReviews() {
   const container = document.getElementById('reviewsList');
+  const formEl = document.getElementById('reviewForm');
+
   try {
     const res = await api.reviews.getByProduct(productId);
-    if (res.success && res.data?.content?.length > 0) {
-      container.innerHTML = res.data.content.map(r => `
+    const reviews = res.data?.content || [];
+    const total = res.data?.totalElements || 0;
+
+    // Rating summary
+    if (reviews.length > 0) {
+      const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
+      const counts = [5,4,3,2,1].map(n => ({ n, c: reviews.filter(r => r.rating === n).length }));
+      document.getElementById('ratingSummary').innerHTML = `
+        <div style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem;padding:1.25rem;background:#FFFBEB;border-radius:12px;border:1px solid #FDE68A">
+          <div style="text-align:center">
+            <div style="font-size:3rem;font-weight:800;font-family:var(--font-heading);color:var(--color-cta);line-height:1">${avg}</div>
+            <div style="margin:4px 0">${renderStars(Math.round(avg))}</div>
+            <div style="font-size:0.8rem;color:var(--color-text-muted)">${total} đánh giá</div>
+          </div>
+          <div style="flex:1;min-width:160px">
+            ${counts.map(({n,c}) => `
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="font-size:0.8rem;width:20px;text-align:right">${n}★</span>
+                <div style="flex:1;height:6px;background:var(--color-border);border-radius:3px;overflow:hidden">
+                  <div style="height:100%;background:var(--color-cta);width:${total > 0 ? Math.round(c/total*100) : 0}%;transition:width .4s"></div>
+                </div>
+                <span style="font-size:0.78rem;color:var(--color-text-muted);width:20px">${c}</span>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    if (reviews.length > 0) {
+      container.innerHTML = reviews.map(r => `
         <div style="border:1px solid var(--color-border);border-radius:12px;padding:1.25rem;margin-bottom:1rem;background:#fff">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--color-gold-light);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--color-cta);font-family:var(--font-heading)">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--color-gold-light);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:var(--color-cta);font-family:var(--font-heading);flex-shrink:0">
               ${(r.userName || 'U').charAt(0).toUpperCase()}
             </div>
             <div>
               <div style="font-weight:600;font-size:0.9rem">${r.userName || 'Ẩn danh'}</div>
               <div class="stars-row">${renderStars(r.rating)}</div>
             </div>
-            <span style="margin-left:auto;font-size:0.78rem;color:var(--color-text-muted)">${formatDate(r.createdAt)}</span>
+            <span style="margin-left:auto;font-size:0.78rem;color:var(--color-text-muted);white-space:nowrap">${formatDate(r.createdAt)}</span>
           </div>
-          <p style="color:var(--color-secondary);font-size:0.9rem;line-height:1.6">${r.comment || ''}</p>
-        </div>
-      `).join('');
+          ${r.comment ? `<p style="color:var(--color-secondary);font-size:0.9rem;line-height:1.6;margin-bottom:${r.imageUrls?.length ? '10px' : '0'}">${r.comment}</p>` : ''}
+          ${r.imageUrls?.length ? `
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              ${r.imageUrls.map(u => `<img src="${u}" onclick="openReviewImg('${u}')" style="width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid var(--color-border)">`).join('')}
+            </div>` : ''}
+        </div>`).join('');
     } else {
       container.innerHTML = `<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Chưa có đánh giá nào</h3><p>Hãy là người đầu tiên đánh giá sản phẩm này</p></div>`;
     }
   } catch {}
 
-  // Review form if logged in
-  if (Auth.isLoggedIn()) {
-    document.getElementById('reviewForm').innerHTML = `
-      <div class="content-card" style="margin-top:1.5rem">
-        <h3 class="content-card__title">Viết đánh giá</h3>
-        <div style="margin-bottom:1rem">
-          <p class="form-label">Đánh giá</p>
-          <div style="display:flex;gap:8px" id="ratingInput">
-            ${[1,2,3,4,5].map(i => `<svg class="star" data-val="${i}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="cursor:pointer;width:28px;height:28px" onclick="setRating(${i})"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`).join('')}
+  // Check canReview
+  if (!Auth.isLoggedIn()) { formEl.style.display = 'none'; return; }
+  try {
+    const canRes = await api.reviews.canReview(productId);
+    if (canRes.success && canRes.data === true) {
+      formEl.innerHTML = `
+        <div class="content-card" style="margin-top:1.5rem">
+          <h3 class="content-card__title">Viết đánh giá</h3>
+          <div style="margin-bottom:1.25rem">
+            <p class="form-label" style="margin-bottom:8px">Chất lượng sản phẩm</p>
+            <div style="display:flex;gap:6px" id="ratingInput">
+              ${[1,2,3,4,5].map(i => `
+                <svg class="star" data-val="${i}" viewBox="0 0 24 24" stroke="#D97706" stroke-width="2"
+                  style="cursor:pointer;width:36px;height:36px;transition:transform .15s"
+                  onmouseover="hoverRating(${i})" onmouseout="resetHover()" onclick="setRating(${i})">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>`).join('')}
+            </div>
+            <p id="ratingLabel" style="font-size:0.82rem;color:var(--color-text-muted);margin-top:6px;min-height:18px"></p>
           </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Nhận xét</label>
-          <textarea class="form-textarea" id="reviewComment" placeholder="Chia sẻ trải nghiệm của bạn..." rows="3"></textarea>
-        </div>
-        <button class="btn btn-dark" onclick="submitReview()" id="reviewSubmitBtn">Gửi đánh giá</button>
-      </div>
-    `;
-    document.getElementById('reviewForm').style.display = 'block';
-  }
+          <div class="form-group" style="margin-bottom:1rem">
+            <label class="form-label">Nhận xét của bạn</label>
+            <textarea class="form-textarea" id="reviewComment" placeholder="Chia sẻ trải nghiệm sử dụng sản phẩm..." rows="4" style="resize:vertical"></textarea>
+          </div>
+          <div style="margin-bottom:1.25rem">
+            <label class="form-label" style="margin-bottom:8px;display:block">Thêm ảnh (tùy chọn, tối đa 4 ảnh)</label>
+            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:8px 16px;border:2px dashed var(--color-border);border-radius:10px;font-size:0.875rem;color:var(--color-text-muted);transition:border-color .2s;user-select:none" onmouseover="this.style.borderColor='var(--color-cta)'" onmouseout="this.style.borderColor='var(--color-border)'">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Chọn ảnh
+              <input type="file" accept="image/*" multiple style="display:none" id="reviewImgInput" onchange="handleReviewImages(this)">
+            </label>
+            <div id="reviewImgPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+          </div>
+          <button class="btn btn-dark" onclick="submitReview()" id="reviewSubmitBtn" style="min-width:160px">Gửi đánh giá</button>
+        </div>`;
+      formEl.style.display = 'block';
+    } else {
+      formEl.style.display = 'none';
+    }
+  } catch { formEl.style.display = 'none'; }
 }
 
-let selectedRating = 0;
+const RATING_LABELS = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Xuất sắc'];
+
+function hoverRating(val) {
+  document.querySelectorAll('#ratingInput .star').forEach((s, i) => {
+    s.style.fill = i < val ? '#D97706' : 'none';
+    s.style.transform = i < val ? 'scale(1.15)' : 'scale(1)';
+  });
+  const lbl = document.getElementById('ratingLabel');
+  if (lbl) lbl.textContent = RATING_LABELS[val];
+}
+
+function resetHover() {
+  document.querySelectorAll('#ratingInput .star').forEach((s, i) => {
+    s.style.fill = i < selectedRating ? '#D97706' : 'none';
+    s.style.transform = 'scale(1)';
+  });
+  const lbl = document.getElementById('ratingLabel');
+  if (lbl) lbl.textContent = selectedRating ? RATING_LABELS[selectedRating] : '';
+}
+
 function setRating(val) {
   selectedRating = val;
-  document.querySelectorAll('#ratingInput .star').forEach((s, i) => {
-    s.style.fill = i < val ? 'var(--color-cta)' : 'none';
-    s.style.color = i < val ? 'var(--color-cta)' : 'var(--color-border)';
+  resetHover();
+}
+
+async function handleReviewImages(input) {
+  const files = Array.from(input.files).slice(0, 4 - reviewImageUrls.length);
+  const preview = document.getElementById('reviewImgPreview');
+  for (const file of files) {
+    if (reviewImageUrls.length >= 4) break;
+    const idx = reviewImageUrls.length;
+    reviewImageUrls.push(null); // placeholder
+    const thumb = document.createElement('div');
+    thumb.style.cssText = 'position:relative;width:80px;height:80px';
+    thumb.innerHTML = `<div style="width:80px;height:80px;border-radius:8px;background:#f5f5f4;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div>`;
+    preview.appendChild(thumb);
+    try {
+      const res = await api.reviews.uploadImage(file);
+      if (res.data?.url) {
+        reviewImageUrls[idx] = res.data.url;
+        thumb.innerHTML = `<img src="${res.data.url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--color-border)">
+          <button onclick="removeReviewImg(${idx},this.parentElement)" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#DC2626;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center">×</button>`;
+      }
+    } catch { reviewImageUrls.splice(idx, 1); thumb.remove(); }
+  }
+  input.value = '';
+}
+
+function removeReviewImg(idx, el) {
+  reviewImageUrls.splice(idx, 1);
+  el.remove();
+  // Re-index remove buttons
+  document.querySelectorAll('#reviewImgPreview > div').forEach((d, i) => {
+    const btn = d.querySelector('button');
+    if (btn) btn.setAttribute('onclick', `removeReviewImg(${i},this.parentElement)`);
   });
+}
+
+function openReviewImg(url) {
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+  ov.onclick = () => ov.remove();
+  ov.innerHTML = `<img src="${url}" style="max-width:90vw;max-height:90vh;border-radius:12px;object-fit:contain">`;
+  document.body.appendChild(ov);
 }
 
 async function submitReview() {
@@ -331,10 +444,15 @@ async function submitReview() {
   const btn = document.getElementById('reviewSubmitBtn');
   setLoading(btn, true);
   try {
-    const res = await api.reviews.create({ productId: parseInt(productId), rating: selectedRating, comment });
+    const imageUrls = reviewImageUrls.filter(Boolean);
+    const res = await api.reviews.create({ productId: parseInt(productId), rating: selectedRating, comment, imageUrls });
     if (res.success) {
       showToast('Đánh giá đã được gửi và đang chờ duyệt!');
       document.getElementById('reviewForm').style.display = 'none';
+      loadReviews();
+    } else {
+      showToast(res.message || 'Không thể gửi đánh giá', 'error');
+      setLoading(btn, false);
     }
   } catch (err) {
     showToast(err.message || 'Không thể gửi đánh giá', 'error');
@@ -354,8 +472,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (res.success && res.data) {
       renderProduct(res.data);
       startFlashCountdown();
-      loadReviews();
+      await loadReviews();
       checkWishlistStatus();
+      // Auto-scroll to review form if coming from order-detail
+      const openReview = sessionStorage.getItem('openReview');
+      if (openReview === String(productId)) {
+        sessionStorage.removeItem('openReview');
+        setTimeout(() => {
+          const form = document.getElementById('reviewForm');
+          if (form && form.style.display !== 'none') {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
     }
   } catch {
     document.getElementById('productContent').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><h3>Không tìm thấy sản phẩm</h3><p><a href="products.html">Quay lại</a></p></div>`;

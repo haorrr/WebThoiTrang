@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(java|html|js\\)$\")",
+      "Bash(/d/Desktop/WebThoiTrang/plans/20260328-scout/reports/scout-report.md:*)",
+      "Bash(/tmp/report.txt:*)",
+      "Read(//tmp/**)"
+    ]
+  }
+}
