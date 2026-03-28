@@ -55,6 +55,7 @@ public class LoyaltyService {
         return Map.of(
             "totalPoints", total,
             "cashValue", (long) total * vndPerPoint,
+            "vndPerPoint", vndPerPoint,
             "totalEarned", totalEarned,
             "totalRedeemed", totalRedeemed,
             "history", history.getContent()
