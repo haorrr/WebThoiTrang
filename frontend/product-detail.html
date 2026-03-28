@@ -55,8 +55,15 @@
   </div>
 
   <!-- Reviews Section -->
-  <div style="padding-bottom:4rem">
-    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1.5rem">Đánh giá sản phẩm</h2>
+  <div style="padding-bottom:4rem" id="reviews">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+      <h2 style="font-size:1.5rem;font-weight:800;margin:0">Đánh giá sản phẩm</h2>
+      <div id="writeReviewBtn" style="display:none">
+        <button class="btn btn-dark btn-sm" onclick="document.getElementById('reviewForm').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('reviewForm').style.boxShadow='0 0 0 3px var(--color-cta)';setTimeout(()=>document.getElementById('reviewForm').style.boxShadow='',2000)">
+          Viết đánh giá
+        </button>
+      </div>
+    </div>
     <div id="ratingSummary"></div>
     <div id="reviewsList"></div>
     <div id="reviewForm" style="display:none"></div>
@@ -275,6 +282,7 @@ let reviewImageUrls = [];
 async function loadReviews() {
   const container = document.getElementById('reviewsList');
   const formEl = document.getElementById('reviewForm');
+  if (!formEl) return;
 
   try {
     const res = await api.reviews.getByProduct(productId);
@@ -336,7 +344,9 @@ async function loadReviews() {
     const canRes = await api.reviews.canReview(productId);
     canReview = canRes.success && canRes.data === true;
   } catch { /* endpoint may not exist yet */ }
+  const writeBtn = document.getElementById('writeReviewBtn');
   if (canReview) {
+      if (writeBtn) writeBtn.style.display = 'block';
       formEl.innerHTML = `
         <div class="content-card" style="margin-top:1.5rem">
           <h3 class="content-card__title">Viết đánh giá</h3>
@@ -369,6 +379,7 @@ async function loadReviews() {
         </div>`;
       formEl.style.display = 'block';
     } else {
+      if (writeBtn) writeBtn.style.display = 'none';
       formEl.style.display = 'none';
     }
 }
@@ -451,6 +462,8 @@ async function submitReview() {
     if (res.success) {
       showToast('Đánh giá đã được gửi và đang chờ duyệt!');
       document.getElementById('reviewForm').style.display = 'none';
+      const wb = document.getElementById('writeReviewBtn');
+      if (wb) wb.style.display = 'none';
       loadReviews();
     } else {
       showToast(res.message || 'Không thể gửi đánh giá', 'error');
@@ -483,9 +496,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => {
           const form = document.getElementById('reviewForm');
           if (form && form.style.display !== 'none') {
-            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const top = form.getBoundingClientRect().top + window.scrollY - 80;
+            window.scrollTo({ top, behavior: 'smooth' });
+            form.style.transition = 'box-shadow 0.3s';
+            form.style.boxShadow = '0 0 0 3px var(--color-cta), 0 8px 24px rgba(0,0,0,0.12)';
+            form.style.borderRadius = '12px';
+            setTimeout(() => { form.style.boxShadow = ''; }, 2500);
+          } else {
+            showToast('Đánh giá sản phẩm có ở cuối trang', 'info');
           }
-        }, 300);
+        }, 400);
       }
     }
   } catch {
