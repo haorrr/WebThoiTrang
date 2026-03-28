@@ -99,12 +99,13 @@ function renderProduct(p) {
   const hasDiscount = displayPrice < origPrice;
   const inStock = p.stock > 0 || variants.some(v => v.stock > 0);
 
-  // Build size/color options from variants if available, else show static defaults
+  // Only show variant selectors when product actually has variants
   const hasSizeVariants = variants.some(v => v.size);
   const hasColorVariants = variants.some(v => v.color);
-  const uniqueSizes = hasSizeVariants ? [...new Set(variants.filter(v => v.size).map(v => v.size))] : ['S','M','L','XL','XXL'];
-  const uniqueColors = hasColorVariants ? [...new Set(variants.filter(v => v.color && v.colorCode).map(v => JSON.stringify({color:v.color,code:v.colorCode})))]
-    .map(s => JSON.parse(s)) : [{color:'Đen',code:'#1C1917'},{color:'Trắng',code:'#FFFFFF'},{color:'Xanh',code:'#1D4ED8'},{color:'Đỏ',code:'#DC2626'}];
+  const uniqueSizes = hasSizeVariants ? [...new Set(variants.filter(v => v.size).map(v => v.size))] : [];
+  const uniqueColors = hasColorVariants
+    ? [...new Set(variants.filter(v => v.color && v.colorCode).map(v => JSON.stringify({color:v.color,code:v.colorCode})))].map(s => JSON.parse(s))
+    : [];
 
   const thumbsHtml = images.length > 1 ? images.map((img, i) =>
     `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" data-idx="${i}">
@@ -141,18 +142,20 @@ function renderProduct(p) {
 
       ${p.description ? `<p style="color:var(--color-text-muted);margin-bottom:1.5rem;line-height:1.7;font-size:0.95rem">${p.description}</p>` : ''}
 
-      <!-- Size Selection -->
+      <!-- Size Selection (only if product has size variants) -->
+      ${uniqueSizes.length > 0 ? `
       <div style="margin-bottom:1.5rem">
         <p class="option-label">Kích thước</p>
         <div class="size-options">
           ${uniqueSizes.map(s => {
-            const variantStock = hasSizeVariants ? variants.filter(v => v.size === s).reduce((sum,v) => sum + v.stock, 0) : p.stock;
+            const variantStock = variants.filter(v => v.size === s).reduce((sum,v) => sum + v.stock, 0);
             return `<button class="size-btn ${variantStock === 0 ? 'disabled' : ''}" onclick="selectSize('${s}',this)" ${variantStock === 0 ? 'disabled' : ''}>${s}</button>`;
           }).join('')}
         </div>
-      </div>
+      </div>` : ''}
 
-      <!-- Color Selection -->
+      <!-- Color Selection (only if product has color variants) -->
+      ${uniqueColors.length > 0 ? `
       <div style="margin-bottom:2rem">
         <p class="option-label">Màu sắc</p>
         <div class="color-options">
@@ -160,7 +163,7 @@ function renderProduct(p) {
             `<div class="color-dot" style="background:${code};border-color:${code === '#FFFFFF' ? '#E7E5E4' : code}" title="${color}" onclick="selectColor('${color}',this)"></div>`
           ).join('')}
         </div>
-      </div>
+      </div>` : ''}
 
       <!-- Actions -->
       <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
