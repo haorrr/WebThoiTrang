@@ -91,6 +91,21 @@
     </div>
   </section>
 
+  <!-- FLASH SALE SECTION -->
+  <section id="flash-sale-section" style="display:none;background:linear-gradient(135deg,#7F1D1D,#DC2626,#F97316);padding:3rem 0">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <span style="color:rgba(255,255,255,0.8);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:600">Ưu đãi có hạn</span>
+        <h2 id="fs-section-title" style="color:#fff;font-size:2rem;margin:8px 0">🔥 Flash Sale</h2>
+        <p id="fs-section-countdown" style="color:#FEF08A;font-size:1.1rem;font-weight:700"></p>
+      </div>
+      <div id="fs-section-grid" class="products__grid"></div>
+      <div style="text-align:center;margin-top:1.5rem">
+        <a id="fs-section-link" href="flash-sale.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.5)">Xem tất cả Flash Sale →</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== BRAND STORY ===== -->
   <section class="brand-story" id="story">
     <div class="container">
@@ -344,6 +359,50 @@
             const el = document.getElementById('fs-countdown');
             if (el) el.textContent = `Còn ${h}h ${m}m ${s}s`;
           }, 1000);
+
+          // Populate Flash Sale section
+          document.getElementById('flash-sale-section').style.display = '';
+          document.getElementById('fs-section-title').textContent = `🔥 ${fs.name}`;
+          document.getElementById('fs-section-link').href = `flash-sale.html?id=${fs.id}`;
+          // Section countdown
+          setInterval(() => {
+            const diff = endsAt - Date.now();
+            if (diff <= 0) { document.getElementById('flash-sale-section').style.display = 'none'; return; }
+            const h = Math.floor(diff/3600000);
+            const m = Math.floor((diff%3600000)/60000);
+            const s = Math.floor((diff%60000)/1000);
+            const el = document.getElementById('fs-section-countdown');
+            if (el) el.textContent = `Kết thúc sau: ${h}h ${m}m ${s}s`;
+          }, 1000);
+          // Render products
+          if (fs.products?.length > 0) {
+            const fsGrid = document.getElementById('fs-section-grid');
+            fsGrid.innerHTML = fs.products.slice(0, 4).map(entry => {
+              const discPct = Math.round((1 - entry.flashPrice / entry.originalPrice) * 100);
+              const imgUrl = entry.primaryImageUrl || 'images/product-jacket.png';
+              return `
+                <div class="product-card reveal" onclick="window.location.href='product-detail.html?id=${entry.productId}'" style="cursor:pointer">
+                  <div class="product-card__image">
+                    <img src="${imgUrl}" alt="${entry.productName}" loading="lazy">
+                    <span class="product-card__badge" style="background:linear-gradient(90deg,#DC2626,#F97316)">-${discPct}%</span>
+                    <button class="product-card__quick-view" onclick="event.stopPropagation();openQuickBuy(${entry.productId})">Mua nhanh</button>
+                  </div>
+                  <div class="product-card__info">
+                    <h3 class="product-card__name">${entry.productName}</h3>
+                    <div class="product-card__price">
+                      <span class="current">${formatVND(entry.flashPrice)}</span>
+                      <span class="original">${formatVND(entry.originalPrice)}</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            setTimeout(() => {
+              fsGrid.querySelectorAll('.reveal').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), i * 100);
+              });
+            }, 100);
+          }
         }
       } catch {}
 

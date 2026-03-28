@@ -44,6 +44,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           Đơn hàng của tôi
         </a>
+        <a href="#loyalty">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Điểm thưởng
+        </a>
         <a href="#" onclick="handleLogout()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Đăng xuất
@@ -78,6 +82,15 @@
         <h2 class="content-card__title">Thông tin tài khoản</h2>
         <div id="accountInfo"></div>
       </div>
+
+      <!-- Loyalty Points -->
+      <div class="content-card" id="loyalty">
+        <h2 class="content-card__title">Điểm thưởng</h2>
+        <div id="loyaltyContent">
+          <div class="skeleton" style="height:120px;border-radius:12px;margin-bottom:1rem"></div>
+          <div class="skeleton" style="height:60px;border-radius:12px"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -88,12 +101,13 @@
   </div>
 </footer>
 
-<script src="js/api.js"></script>
+<script src="js/api.js?v=3"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   if (!Auth.isLoggedIn()) { window.location.href = 'login.html'; return; }
   renderNavActions();
   loadProfile();
+  loadLoyalty();
   window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
   }, { passive: true });
@@ -122,6 +136,63 @@ async function loadProfile() {
       `;
     }
   } catch {}
+}
+
+async function loadLoyalty() {
+  const container = document.getElementById('loyaltyContent');
+  try {
+    const [sumRes, refRes] = await Promise.all([
+      api.loyalty.getSummary(),
+      api.loyalty.getReferralCode()
+    ]);
+    const s = sumRes.success ? sumRes.data : { totalPoints: 0, totalEarned: 0, totalRedeemed: 0, history: [] };
+    const refCode = refRes.success ? refRes.data : '';
+    const typeColor = { EARNED: '#16A34A', REDEEMED: '#DC2626', REFERRAL_BONUS: '#7C3AED', EXPIRED: '#F97316' };
+    const typeLabel = { EARNED: 'Tích lũy', REDEEMED: 'Đổi điểm', REFERRAL_BONUS: 'Giới thiệu', EXPIRED: 'Hết hạn' };
+    const history = s.history || [];
+    container.innerHTML = `
+      <div style="text-align:center;padding:1.5rem;background:linear-gradient(135deg,#7C3AED,#4F46E5);border-radius:12px;color:#fff;margin-bottom:1.5rem">
+        <div style="font-size:3rem;font-weight:700;line-height:1">${s.totalPoints.toLocaleString('vi-VN')}</div>
+        <div style="font-size:0.9rem;opacity:0.85;margin-top:4px">điểm tích lũy</div>
+        <div style="font-size:1.1rem;font-weight:600;margin-top:8px">${formatVND(s.totalPoints * 1000)}</div>
+        <div style="display:flex;justify-content:center;gap:2rem;margin-top:1rem;font-size:0.82rem;opacity:0.9">
+          <div><div style="font-weight:600">${s.totalEarned.toLocaleString('vi-VN')}</div><div>Đã tích lũy</div></div>
+          <div><div style="font-weight:600">${s.totalRedeemed.toLocaleString('vi-VN')}</div><div>Đã đổi</div></div>
+        </div>
+      </div>
+      ${refCode ? `
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--color-bg);border:1px solid var(--color-border);border-radius:10px;margin-bottom:1.5rem">
+        <span style="font-size:0.85rem;color:var(--color-text-muted);flex-shrink:0">Mã giới thiệu:</span>
+        <code id="refCodeText" style="flex:1;font-size:1rem;font-weight:700;letter-spacing:0.05em;color:var(--color-text)">${refCode}</code>
+        <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('${refCode}').then(()=>showToast('Đã sao chép mã giới thiệu!'))">Sao chép</button>
+      </div>` : ''}
+      ${history.length > 0 ? `
+      <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.75rem">Lịch sử giao dịch</h3>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+          <thead>
+            <tr style="border-bottom:2px solid var(--color-border)">
+              <th style="text-align:left;padding:8px 10px;color:var(--color-text-muted);font-weight:500">Loại</th>
+              <th style="text-align:right;padding:8px 10px;color:var(--color-text-muted);font-weight:500">Điểm</th>
+              <th style="text-align:left;padding:8px 10px;color:var(--color-text-muted);font-weight:500">Mô tả</th>
+              <th style="text-align:left;padding:8px 10px;color:var(--color-text-muted);font-weight:500">Thời gian</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${history.map(h => `
+            <tr style="border-bottom:1px solid var(--color-border)">
+              <td style="padding:8px 10px"><span style="color:${typeColor[h.type]||'var(--color-text)'};font-weight:600">${typeLabel[h.type]||h.type}</span></td>
+              <td style="padding:8px 10px;text-align:right;font-weight:600;color:${h.points>0?'#16A34A':'#DC2626'}">${h.points>0?'+':''}${h.points}</td>
+              <td style="padding:8px 10px;color:var(--color-text-muted)">${h.description||''}</td>
+              <td style="padding:8px 10px;color:var(--color-text-muted)">${formatDate(h.createdAt)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>` : '<p style="color:var(--color-text-muted);font-size:0.9rem">Chưa có giao dịch điểm thưởng nào.</p>'}
+    `;
+  } catch (e) {
+    container.innerHTML = '<p style="color:var(--color-text-muted)">Không thể tải thông tin điểm thưởng.</p>';
+  }
 }
 
 document.getElementById('profileForm').addEventListener('submit', async (e) => {

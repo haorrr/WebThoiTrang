@@ -625,11 +625,12 @@ async function saveProduct() {
     const res = id ? await api.products.update(id, data) : await api.products.create(data);
     if (res.success) {
       if (!id) {
-        // New product: reopen modal with image section
         closeProductModal();
-        showToast('Đã thêm sản phẩm — có thể thêm ảnh bên dưới');
+        showToast('Đã thêm sản phẩm! Hãy thêm biến thể size/màu bên dưới.');
         loadProducts();
         await editProduct(res.data.id);
+        switchModalTab('variants');
+        openVariantForm();
       } else {
         closeProductModal();
         showToast('Đã cập nhật sản phẩm');

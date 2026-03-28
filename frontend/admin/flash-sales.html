@@ -93,6 +93,11 @@
 
 <script src="../js/api.js?v=3"></script>
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (!Auth.isLoggedIn() || !Auth.isAdmin()) { window.location.href = '../login.html'; return; }
+  loadSales();
+});
+
 let pmSearchTimer;
 
 async function loadSales() {
@@ -231,7 +236,6 @@ async function removeProduct(fsId, productId) {
 
 function viewDetail(id) { window.open('../flash-sale.html?id=' + id, '_blank'); }
 
-document.addEventListener('DOMContentLoaded', () => { loadSales(); });
 </script>
 </body>
 </html>
