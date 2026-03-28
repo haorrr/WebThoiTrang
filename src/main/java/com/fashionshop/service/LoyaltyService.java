@@ -50,8 +50,8 @@ public class LoyaltyService {
         Page<LoyaltyPointResponse> history = loyaltyPointRepository
                 .findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 20))
                 .map(LoyaltyPointResponse::from);
-        int totalEarned = loyaltyPointRepository.getTotalByType(userId, "EARNED");
-        int totalRedeemed = Math.abs(loyaltyPointRepository.getTotalByType(userId, "REDEEMED"));
+        int totalEarned = loyaltyPointRepository.getTotalByType(userId, LoyaltyPoint.Type.EARNED);
+        int totalRedeemed = Math.abs(loyaltyPointRepository.getTotalByType(userId, LoyaltyPoint.Type.REDEEMED));
         return Map.of(
             "totalPoints", total,
             "cashValue", (long) total * vndPerPoint,

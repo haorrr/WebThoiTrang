@@ -15,7 +15,7 @@ public interface LoyaltyPointRepository extends JpaRepository<LoyaltyPoint, Long
     int getTotalPoints(@Param("userId") Long userId);
 
     @Query("SELECT COALESCE(SUM(lp.points), 0) FROM LoyaltyPoint lp WHERE lp.user.id = :userId AND lp.type = :type")
-    int getTotalByType(@Param("userId") Long userId, @Param("type") String type);
+    int getTotalByType(@Param("userId") Long userId, @Param("type") LoyaltyPoint.Type type);
 
     @Query(value = """
             SELECT u.id, u.name, u.email,
