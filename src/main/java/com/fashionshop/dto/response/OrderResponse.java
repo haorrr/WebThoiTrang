@@ -24,6 +24,7 @@ public class OrderResponse {
     private BigDecimal finalAmount;
     private String shippingAddress;
     private String paymentMethod;
+    private String paymentStatus;
     private String couponCode;
     private String notes;
     private String trackingNumber;
@@ -45,6 +46,7 @@ public class OrderResponse {
                 .finalAmount(o.getTotalAmount().subtract(o.getDiscountAmount()).subtract(o.getPointsDiscountAmount()))
                 .shippingAddress(o.getShippingAddress())
                 .paymentMethod(o.getPaymentMethod())
+                .paymentStatus(o.getPaymentStatus() != null ? o.getPaymentStatus().name() : "N_A")
                 .couponCode(o.getCoupon() != null ? o.getCoupon().getCode() : null)
                 .notes(o.getNotes())
                 .trackingNumber(o.getTrackingNumber())

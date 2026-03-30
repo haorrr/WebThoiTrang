@@ -59,10 +59,14 @@
         </div>
         <div class="form-group">
           <label class="form-label">Phương thức thanh toán</label>
-          <select class="form-select" id="paymentMethod">
+          <select class="form-select" id="paymentMethod" onchange="toggleMomoInfo(this.value)">
             <option value="COD">Thanh toán khi nhận hàng (COD)</option>
             <option value="BANK_TRANSFER">Chuyển khoản ngân hàng</option>
+            <option value="MOMO">Ví MoMo (thanh toán online)</option>
           </select>
+          <div id="momoInfo" style="display:none;margin-top:8px;padding:10px 14px;background:#f3e8ff;border-radius:10px;border:1px solid #d8b4fe;font-size:0.85rem;color:#6b21a8">
+            <strong>Thanh toán qua MoMo:</strong> Sau khi đặt hàng, bạn sẽ được chuyển đến trang thanh toán MoMo.
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Ghi chú (tùy chọn)</label>
@@ -325,22 +329,45 @@
       document.getElementById('checkoutAlertBox').innerHTML = '';
     }
 
+    function toggleMomoInfo(val) {
+      document.getElementById('momoInfo').style.display = val === 'MOMO' ? 'block' : 'none';
+    }
+
     async function placeOrder() {
       const address = document.getElementById('shippingAddress').value.trim();
       if (!address) { document.getElementById('checkoutAlertBox').innerHTML = '<div class="alert alert-error">Vui lòng nhập địa chỉ giao hàng</div>'; return; }
+      const paymentMethod = document.getElementById('paymentMethod').value;
       const btn = document.getElementById('placeOrderBtn');
       setLoading(btn, true);
       try {
         const res = await api.orders.create({
           shippingAddress: address,
-          paymentMethod: document.getElementById('paymentMethod').value,
+          paymentMethod,
           notes: document.getElementById('orderNotes').value.trim() || null,
           couponCode: appliedCoupon?.code || null,
           pointsToRedeem: pointsToRedeem > 0 ? pointsToRedeem : null,
         });
         if (res.success && res.data) {
+          const orderId = res.data.id;
+
+          if (paymentMethod === 'MOMO') {
+            showToast('Đang kết nối MoMo...', 'info');
+            try {
+              const momoRes = await api.payment.momoCreate(orderId);
+              if (momoRes.success && momoRes.data?.payUrl) {
+                window.location.href = momoRes.data.payUrl;
+                return;
+              }
+              throw new Error(momoRes.message || 'Không thể kết nối MoMo');
+            } catch (momoErr) {
+              document.getElementById('checkoutAlertBox').innerHTML = `<div class="alert alert-error">${momoErr.message || 'Lỗi kết nối MoMo'}</div>`;
+              setLoading(btn, false);
+              return;
+            }
+          }
+
           closeCheckout();
-          window.location.href = `checkout-success.html?orderId=${res.data.id}`;
+          window.location.href = `checkout-success.html?orderId=${orderId}`;
         }
       } catch (err) {
         document.getElementById('checkoutAlertBox').innerHTML = `<div class="alert alert-error">${err.message || 'Đặt hàng thất bại'}</div>`;

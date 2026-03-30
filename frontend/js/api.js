@@ -229,6 +229,9 @@ const api = {
     getPublicConfig: () => apiFetch('/public/security-config'),
     reportDevtools: () => apiFetch('/security/devtools-detected', { method: 'POST' }),
   },
+  payment: {
+    momoCreate: (orderId) => apiFetch('/payment/momo/create', { method: 'POST', body: JSON.stringify({ orderId }) }),
+  },
 };
 
 // ===== UI HELPERS =====

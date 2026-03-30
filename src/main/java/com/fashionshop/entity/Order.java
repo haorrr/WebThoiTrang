@@ -67,7 +67,22 @@ public class Order extends BaseEntity {
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 30)
+    @Builder.Default
+    private PaymentStatus paymentStatus = PaymentStatus.N_A;
+
+    @Column(name = "momo_transaction_id", length = 100)
+    private String momoTransactionId;
+
+    @Column(name = "payment_url", columnDefinition = "TEXT")
+    private String paymentUrl;
+
     public enum Status {
         PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED
+    }
+
+    public enum PaymentStatus {
+        N_A, PENDING_PAYMENT, PAID, FAILED
     }
 }

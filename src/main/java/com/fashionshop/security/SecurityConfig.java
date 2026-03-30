@@ -50,6 +50,8 @@ public class SecurityConfig {
                     "/", "/index.html", "/*.html", "/admin/*.html", "/oauth2/*.html",
                     "/*.css", "/*.js", "/css/**", "/js/**", "/images/**", "/favicon.ico"
                 ).permitAll()
+                // MoMo payment callbacks (no auth — called by MoMo server)
+                .requestMatchers("/api/payment/momo/ipn", "/api/payment/momo/return").permitAll()
                 // Public product/category/flash-sale browsing
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()

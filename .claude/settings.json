@@ -6,7 +6,15 @@
       "Bash(/tmp/report.txt:*)",
       "Read(//tmp/**)",
       "Bash(xargs cat:*)",
-      "Bash(grep -n \"formEl.style.display = ''none'';\" d:/Desktop/WebThoiTrang/frontend/product-detail.html)"
+      "Bash(grep -n \"formEl.style.display = ''none'';\" d:/Desktop/WebThoiTrang/frontend/product-detail.html)",
+      "WebFetch(domain:developers.momo.vn)",
+      "WebSearch",
+      "Bash(grep -E \"\\\\.\\(java|yml|properties\\)$\")",
+      "WebFetch(domain:www.postman.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:smattme.com)",
+      "Bash(ls d:/Desktop/WebThoiTrang/*.xml d:/Desktop/WebThoiTrang/mvnw*)",
+      "Bash(ls d:/Desktop/WebThoiTrang/gradlew*)"
     ]
   }
 }

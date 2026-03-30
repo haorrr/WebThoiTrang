@@ -123,7 +123,11 @@ function renderOrder(o) {
           <h2 class="content-card__title">Thông tin đơn hàng</h2>
           <div class="summary-row"><span style="color:var(--color-text-muted)">Trạng thái</span><span>${getStatusBadge(o.status)}</span></div>
           <div class="summary-row"><span style="color:var(--color-text-muted)">Ngày đặt</span><span>${formatDate(o.createdAt)}</span></div>
-          <div class="summary-row"><span style="color:var(--color-text-muted)">Thanh toán</span><span>${o.paymentMethod}</span></div>
+          <div class="summary-row"><span style="color:var(--color-text-muted)">Thanh toán</span><span>
+            ${o.paymentMethod === 'MOMO' ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;padding:2px 10px;background:#f3e8ff;color:#6b21a8;border-radius:20px;border:1px solid #d8b4fe">
+              MoMo · ${o.paymentStatus === 'PAID' ? 'Đã thanh toán' : o.paymentStatus === 'FAILED' ? 'Thất bại' : 'Chờ thanh toán'}
+            </span>` : o.paymentMethod}
+          </span></div>
           ${o.couponCode ? `<div class="summary-row"><span style="color:var(--color-text-muted)">Mã giảm giá</span><span>${o.couponCode}</span></div>` : ''}
           <hr style="margin:12px 0;border:none;border-top:1px solid var(--color-border)">
           <div class="summary-row"><span>Tạm tính</span><span>${formatVND(o.totalAmount)}</span></div>

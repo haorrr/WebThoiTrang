@@ -78,3 +78,10 @@ app:
   gemini:
     api-key: ${GEMINI_API_KEY:}
     model: gemini-1.5-flash
+  momo:
+    partner-code: ${MOMO_PARTNER_CODE:MOMOLTBL20251126_TEST}
+    access-key: ${MOMO_ACCESS_KEY:RvngcZENbpyGiHJw}
+    secret-key: ${MOMO_SECRET_KEY:cXwepYhzfFGryJZ7h744esYYE4rVIx9F}
+    endpoint: ${MOMO_ENDPOINT:https://test-payment.momo.vn}
+    redirect-url: ${MOMO_REDIRECT_URL:http://localhost:8080/api/payment/momo/return}
+    ipn-url: ${MOMO_IPN_URL:http://localhost:8080/api/payment/momo/ipn}
