@@ -34,5 +34,6 @@ EXPOSE 8080
 ENTRYPOINT ["java", \
     "-XX:+UseContainerSupport", \
     "-XX:MaxRAMPercentage=75.0", \
+    "-Duser.timezone=Asia/Ho_Chi_Minh", \
     "-jar", "app.jar", \
     "--spring.profiles.active=prod"]
