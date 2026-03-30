@@ -52,7 +52,7 @@
     <form id="couponForm">
       <div class="form-group"><label class="form-label">Mã code *</label><input class="form-input" id="cCode" placeholder="MAISON10" required></div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Loại *</label><select class="form-select" id="cType"><option value="PERCENTAGE">Phần trăm (%)</option><option value="FIXED_AMOUNT">Cố định (VND)</option></select></div>
+        <div class="form-group"><label class="form-label">Loại *</label><select class="form-select" id="cType"><option value="PERCENT">Phần trăm (%)</option><option value="FIXED">Cố định (VND)</option></select></div>
         <div class="form-group"><label class="form-label">Giá trị *</label><input class="form-input" type="number" id="cValue" placeholder="10" required min="1"></div>
       </div>
       <div class="form-row">
@@ -89,8 +89,8 @@ async function loadCoupons() {
       tbody.innerHTML = coupons.length ? coupons.map(c => `
         <tr>
           <td><span style="font-family:monospace;font-weight:700;background:var(--color-gold-light);padding:3px 8px;border-radius:4px">${c.code}</span></td>
-          <td style="font-size:0.82rem">${c.discountType === 'PERCENTAGE' ? 'Phần trăm' : 'Cố định'}</td>
-          <td style="font-weight:600;color:var(--color-cta)">${c.discountType === 'PERCENTAGE' ? c.discountValue + '%' : formatVND(c.discountValue)}</td>
+          <td style="font-size:0.82rem">${c.discountType === 'PERCENT' ? 'Phần trăm' : 'Cố định'}</td>
+          <td style="font-weight:600;color:var(--color-cta)">${c.discountType === 'PERCENT' ? c.discountValue + '%' : formatVND(c.discountValue)}</td>
           <td>${c.minOrderAmount ? formatVND(c.minOrderAmount) : '—'}</td>
           <td style="font-size:0.8rem">${c.endDate ? formatDate(c.endDate) : '—'}</td>
           <td>${c.usedCount || 0} / ${c.maxUses || '∞'}</td>
@@ -132,7 +132,7 @@ async function saveCoupon() {
   const data = { code: document.getElementById('cCode').value.trim().toUpperCase(), discountType: document.getElementById('cType').value,
     discountValue: parseFloat(document.getElementById('cValue').value), minOrderAmount: document.getElementById('cMinOrder').value ? parseFloat(document.getElementById('cMinOrder').value) : 0,
     maxUses: document.getElementById('cMaxUses').value ? parseInt(document.getElementById('cMaxUses').value) : null,
-    startDate: document.getElementById('cStartDate').value || null, endDate: document.getElementById('cEndDate').value || null };
+    expiresAt: document.getElementById('cEndDate').value || null };
   if (!data.code || !data.discountValue) { alertBox.innerHTML = `<div class="alert alert-error">Vui lòng điền đầy đủ thông tin</div>`; return; }
   const btn = document.getElementById('saveCouponBtn'); setLoading(btn, true);
   try {
