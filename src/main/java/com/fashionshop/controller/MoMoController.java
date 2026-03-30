@@ -66,6 +66,11 @@ public class MoMoController {
             @RequestParam(required = false, defaultValue = "-1") String resultCode,
             HttpServletResponse response) throws IOException {
 
+        // MoMo appends its own orderId, causing Spring to join them with a comma (e.g. "12,MOMOLTBL2025...")
+        if (orderId != null && orderId.contains(",")) {
+            orderId = orderId.split(",")[0];
+        }
+
         String status = "0".equals(resultCode) ? "success" : "failed";
         response.sendRedirect("/payment-result.html?status=" + status + "&orderId=" + orderId);
     }
