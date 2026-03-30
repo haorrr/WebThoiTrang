@@ -262,6 +262,14 @@ async function addToCart() {
     setTimeout(() => window.location.href = 'login.html', 1200);
     return;
   }
+  const uniqueSizes = [...new Set((product?.variants || []).map(v => v.size).filter(Boolean))];
+  const uniqueColors = [...new Set((product?.variants || []).map(v => v.color).filter(Boolean))];
+  if (uniqueSizes.length > 0 && !selectedSize) {
+    showToast('Vui lòng chọn kích thước', 'error'); return;
+  }
+  if (uniqueColors.length > 0 && !selectedColor) {
+    showToast('Vui lòng chọn màu sắc', 'error'); return;
+  }
   const btn = document.getElementById('addToCartBtn');
   setLoading(btn, true);
   try {

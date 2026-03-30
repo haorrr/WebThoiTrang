@@ -133,6 +133,7 @@ public class FlashSaleService {
     @Transactional(readOnly = true)
     public java.util.Map<Long, FlashInfo> getActiveFlashInfoMap() {
         return flashSaleProductRepository.findAllActive().stream()
+                .filter(fsp -> fsp.getProduct() != null)
                 .collect(java.util.stream.Collectors.toMap(
                         fsp -> fsp.getProduct().getId(),
                         fsp -> {

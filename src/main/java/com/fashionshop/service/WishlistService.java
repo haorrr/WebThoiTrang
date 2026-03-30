@@ -26,6 +26,7 @@ public class WishlistService {
     @Transactional(readOnly = true)
     public List<ProductSummaryResponse> getWishlist(Long userId) {
         return wishlistRepository.findByUserId(userId).stream()
+                .filter(w -> w.getProduct() != null)
                 .map(w -> ProductSummaryResponse.from(w.getProduct()))
                 .toList();
     }

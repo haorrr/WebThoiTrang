@@ -43,7 +43,7 @@ public class FlashSaleResponse {
     }
 
     public static FlashSaleResponse from(FlashSale fs) {
-        List<FlashSaleProductEntry> entries = fs.getProducts().stream().map(fsp -> {
+        List<FlashSaleProductEntry> entries = fs.getProducts().stream().filter(fsp -> fsp.getProduct() != null).map(fsp -> {
             BigDecimal original = fsp.getProduct().getEffectivePrice();
             BigDecimal flash = original.multiply(
                     BigDecimal.ONE.subtract(fs.getDiscountPercent().divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))

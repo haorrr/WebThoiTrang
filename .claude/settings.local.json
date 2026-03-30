@@ -33,7 +33,11 @@
       "Bash(du -h /d/Desktop/WebThoiTrang/plans/phase-01/reports/*)",
       "Bash(xargs grep:*)",
       "Bash(./mvnw compile:*)",
-      "WebFetch(domain:icondenim.com)"
+      "WebFetch(domain:icondenim.com)",
+      "Bash(grep -E \"\\\\.\\(jsx?|tsx?\\)$\")",
+      "Bash(\"/c/Users/PC/Desktop/WebThoiTrang/plans/bug-analysis/reports/scout-report.md\")",
+      "Bash(\"/c/Users/PC/Desktop/WebThoiTrang/plans/bug-analysis/reports/bug-files-summary.txt\":*)",
+      "Bash(\"/c/Users/PC/Desktop/WebThoiTrang/plans/bug-analysis/reports/detailed-code-snippets.txt\":*)"
     ]
   }
 }

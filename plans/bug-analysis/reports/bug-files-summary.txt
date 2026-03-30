@@ -1,0 +1,157 @@
+CODEBASE SCOUT REPORT - 5 BUG LOCATIONS
+=======================================
+Date: 2026-03-30
+Project: WebThoiTrang Fashion eCommerce
+
+---
+
+BUG #1: Frontend Product Detail Page - Add to Cart Button
+=========================================================
+FILES:
+1. /c/Users/PC/Desktop/WebThoiTrang/frontend/product-detail.html
+   - Lines 178-181: HTML button with onclick="addToCart()"
+   - Lines 259-277: JavaScript addToCart() function
+   - Makes POST request to /api/cart/items
+
+2. /c/Users/PC/Desktop/WebThoiTrang/frontend/js/api.js
+   - Line 127: api.cart.addItem() wrapper
+
+3. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/CartController.java
+   - Lines 36-51: POST /api/cart/items endpoint
+
+4. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/CartService.java
+   - Lines 62-95: addItem() service logic with stock validation
+
+
+BUG #2: Frontend Shop Page - Price Sort Filter & Category Dropdown
+==================================================================
+FILES:
+1. /c/Users/PC/Desktop/WebThoiTrang/frontend/products.html
+   - Lines 43-49: Category dropdown HTML
+   - Lines 75-80: Sort select with options (price,asc/desc etc)
+   - Lines 137-157: loadCategories() function - loads from /api/categories
+   - Lines 225-267: loadProducts() function - filters with params
+   - Lines 123-126: applyFilters() main handler
+
+2. /c/Users/PC/Desktop/WebThoiTrang/frontend/js/api.js
+   - Line 95: api.products.list() wrapper
+   - Line 111: api.categories.list() wrapper
+
+
+BUG #3: Frontend Admin Coupon Page - Toggle Button & Status Display
+===================================================================
+FILES:
+1. /c/Users/PC/Desktop/WebThoiTrang/frontend/admin/coupons.html
+   - Lines 86-108: loadCoupons() renders table with toggle button
+   - Line 100: Status badge using getStatusBadge(c.active ? 'ACTIVE' : 'INACTIVE')
+   - Line 103: Toggle button onclick="toggleCoupon(${c.id})"
+   - Lines 147-150: toggleCoupon() function - PATCH /api/coupons/{id}/toggle
+
+2. /c/Users/PC/Desktop/WebThoiTrang/frontend/js/api.js
+   - Line 168: api.coupons.toggle() wrapper
+
+3. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/CouponController.java
+   - Lines 78-83: PATCH /api/coupons/{id}/toggle endpoint
+
+4. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/CouponService.java
+   - Lines 100-106: toggleStatus() service logic
+
+
+BUG #4: Backend Controllers/Services - 500 Errors (Cart, FlashSale, Wishlist)
+=============================================================================
+CART:
+1. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/CartController.java
+   - Full file (Lines 1-86)
+   - GET /api/cart - Line 31
+   - POST /api/cart/items - Line 38
+   - PUT /api/cart/items/{itemId} - Line 55
+   - DELETE /api/cart/items/{itemId} - Line 65
+   - DELETE /api/cart - Line 75
+
+2. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/CartService.java
+   - Full file
+   - getCart() - Lines 36-59
+   - addItem() - Lines 62-95 (stock validation logic)
+
+FLASH SALE:
+1. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/FlashSaleController.java
+   - Full file (Lines 1-91)
+   - GET /api/flash-sales/active - Line 29
+   - GET /api/flash-sales/{id} - Line 35
+   - GET /api/admin/flash-sales - Line 42
+   - POST /api/admin/flash-sales - Line 51
+   - PUT /api/admin/flash-sales/{id} - Line 59
+   - DELETE /api/admin/flash-sales/{id} - Line 67
+   - POST /api/admin/flash-sales/{id}/products - Line 75
+   - DELETE /api/admin/flash-sales/{id}/products/{productId} - Line 85
+
+2. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/FlashSaleService.java
+   - Full file
+   - Uses @Cacheable(value = "activeSales")
+   - getActiveSales() - Line 40
+   - getById() - Line 46
+   - getAll() - Line 53
+   - create() - Line 60
+   - update() - Line 82
+   - delete() - Line 100
+   - addProduct() - Line 107
+   - removeProduct() - Line 125
+
+WISHLIST:
+1. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/WishlistController.java
+   - Full file (Lines 1-49)
+   - GET /api/wishlist - Line 28
+   - POST /api/wishlist/{productId} - Line 34
+   - GET /api/wishlist/check/{productId} - Line 41
+
+2. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/WishlistService.java
+   - Full file (Lines 1-53)
+   - getWishlist() - Line 27
+   - toggle() - Line 34
+   - isWishlisted() - Line 50
+
+
+BUG #5: Frontend Admin Flash Sale Page
+======================================
+FILES:
+1. /c/Users/PC/Desktop/WebThoiTrang/frontend/admin/flash-sales.html
+   - Lines 104-143: loadSales() function - GET /api/admin/flash-sales
+   - Lines 110-142: Renders table with action buttons
+   - Lines 121-129: Action buttons (detail, edit, add product, delete)
+   - Lines 155-165: editSale() function
+   - Lines 167-185: save() function - POST/PUT /api/admin/flash-sales
+   - Lines 189-193: deleteSale() function
+   - Lines 221-231: addProductToSale() function - POST /api/admin/flash-sales/{id}/products
+   - Lines 233-236: removeProduct() function
+
+2. /c/Users/PC/Desktop/WebThoiTrang/frontend/js/api.js
+   - Lines 186-195: Flash sale API wrappers
+   - getActive() - Line 187
+   - getById() - Line 188
+   - adminList() - Line 189
+   - create() - Line 190
+   - update() - Line 191
+   - delete() - Line 192
+   - addProduct() - Line 193
+   - removeProduct() - Line 194
+
+
+SUMMARY - ALL AFFECTED FILES
+=============================
+
+Frontend Files:
+1. /c/Users/PC/Desktop/WebThoiTrang/frontend/product-detail.html
+2. /c/Users/PC/Desktop/WebThoiTrang/frontend/products.html
+3. /c/Users/PC/Desktop/WebThoiTrang/frontend/admin/coupons.html
+4. /c/Users/PC/Desktop/WebThoiTrang/frontend/admin/flash-sales.html
+5. /c/Users/PC/Desktop/WebThoiTrang/frontend/js/api.js
+
+Backend Files:
+1. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/CartController.java
+2. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/FlashSaleController.java
+3. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/WishlistController.java
+4. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/controller/CouponController.java
+5. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/CartService.java
+6. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/FlashSaleService.java
+7. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/WishlistService.java
+8. /c/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/service/CouponService.java

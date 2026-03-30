@@ -37,12 +37,14 @@ public class CartService {
         List<CartItem> items = cartItemRepository.findByUserId(userId);
         Map<Long, FlashSaleService.FlashInfo> flashMap = flashSaleService.getActiveFlashInfoMap();
 
-        List<CartItemResponse> responses = items.stream().map(i -> {
-            CartItemResponse dto = CartItemResponse.from(i);
-            FlashSaleService.FlashInfo fi = flashMap.get(i.getProduct().getId());
-            if (fi != null) dto.setFlashPrice(fi.flashPrice());
-            return dto;
-        }).toList();
+        List<CartItemResponse> responses = items.stream()
+                .filter(i -> i.getProduct() != null)
+                .map(i -> {
+                    CartItemResponse dto = CartItemResponse.from(i);
+                    FlashSaleService.FlashInfo fi = flashMap.get(i.getProduct().getId());
+                    if (fi != null) dto.setFlashPrice(fi.flashPrice());
+                    return dto;
+                }).toList();
 
         BigDecimal subtotal = responses.stream()
                 .map(r -> (r.getFlashPrice() != null ? r.getFlashPrice()

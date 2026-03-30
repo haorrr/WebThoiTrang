@@ -97,10 +97,10 @@ async function loadCoupons() {
           <td>${c.minOrderAmount ? formatVND(c.minOrderAmount) : '—'}</td>
           <td style="font-size:0.8rem">${c.expiresAt ? formatDate(c.expiresAt) : '—'}</td>
           <td>${c.usedCount || 0} / ${c.maxUses || '∞'}</td>
-          <td>${getStatusBadge(c.active ? 'ACTIVE' : 'INACTIVE')}</td>
+          <td>${getStatusBadge(c.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE')}</td>
           <td><div class="actions">
             <button class="btn btn-xs btn-outline" onclick="editCoupon(${c.id})">Sửa</button>
-            <button class="btn btn-xs ${c.active ? 'btn-danger' : 'btn-success'}" onclick="toggleCoupon(${c.id})">${c.active ? 'Tắt' : 'Bật'}</button>
+            <button class="btn btn-xs ${c.status === 'ACTIVE' ? 'btn-danger' : 'btn-success'}" onclick="toggleCoupon(${c.id})">${c.status === 'ACTIVE' ? 'Tắt' : 'Bật'}</button>
           </div></td>
         </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--color-text-muted)">Chưa có mã giảm giá</td></tr>`;
     }
