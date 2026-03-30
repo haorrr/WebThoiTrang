@@ -44,7 +44,7 @@ public class MoMoService {
         long amount = finalAmount.longValue();
 
         String requestId   = moMoConfig.getPartnerCode() + System.currentTimeMillis();
-        String momoOrderId = moMoConfig.getPartnerCode() + "_" + orderId + "_" + System.currentTimeMillis();
+        String momoOrderId = moMoConfig.getPartnerCode() + "-" + orderId + "-" + System.currentTimeMillis();
         String orderInfo   = "Thanh toan don hang #" + orderId;
         String extraData   = "";
         String redirectUrl = moMoConfig.getRedirectUrl() + "?orderId=" + orderId;
@@ -151,8 +151,8 @@ public class MoMoService {
             return;
         }
 
-        // Parse internal order ID from momoOrderId format: PARTNERCODE_orderId_timestamp
-        String[] parts = orderId.split("_");
+        // Parse internal order ID from momoOrderId format: PARTNERCODE-orderId-timestamp
+        String[] parts = orderId.split("-");
         if (parts.length < 2) {
             log.warn("MoMo IPN: cannot parse orderId={}", orderId);
             return;
