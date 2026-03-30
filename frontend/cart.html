@@ -196,9 +196,10 @@
           <div style="display:flex;gap:8px;align-items:center">
             <input type="number" id="loyaltyInput" class="form-input" min="0" max="${loyaltyPointsAvailable}" step="1"
               placeholder="Nhập điểm muốn dùng" style="flex:1;font-size:0.85rem;padding:6px 10px"
-              oninput="applyLoyaltyPoints()" value="${pointsToRedeem || ''}">
-              onblur="this.value = pointsToRedeem"
-              <button class="btn btn-sm" style="background:#CA8A04;color:#fff;border:none;white-space:nowrap" onclick="useAllPoints()">Dùng tất cả</button>
+              oninput="applyLoyaltyPoints()" 
+              onblur="this.value = pointsToRedeem" 
+              value="${pointsToRedeem || ''}">
+            <button class="btn btn-sm" style="background:#CA8A04;color:#fff;border:none;white-space:nowrap" onclick="useAllPoints()">Dùng tất cả</button>
           </div>
           <div id="loyaltyFeedback" style="font-size:0.78rem;color:#16A34A;margin-top:6px">${pointsToRedeem > 0 ? `✓ Giảm ${formatVND(Math.min(pointsToRedeem * vndPerPoint, subtotal - discountAmount))} từ điểm thưởng` : ''}</div>
         </div>` : ''}
