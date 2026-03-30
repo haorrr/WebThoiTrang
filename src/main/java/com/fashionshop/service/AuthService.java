@@ -143,9 +143,12 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElse(null);
 
-        // Always return success to prevent email enumeration
-        if (user == null || user.getProvider() != User.Provider.LOCAL) {
-            return;
+        if (user == null) {
+            return; // Prevent email enumeration
+        }
+        if (user.getProvider() != User.Provider.LOCAL) {
+            String providerName = user.getProvider().name().charAt(0) + user.getProvider().name().substring(1).toLowerCase();
+            throw new BadRequestException("Tài khoản " + providerName + " không hỗ trợ đặt lại mật khẩu. Vui lòng đăng nhập bằng " + providerName + ".");
         }
 
         // Delete previous unused tokens
@@ -200,10 +203,12 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String accessToken = jwtService.generateAccessToken(userDetails);
 
+        // Reload from DB to get fresh role (e.g., if admin promoted this user)
+        User freshUser = userRepository.findById(user.getId()).orElse(user);
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .user(UserSummaryResponse.from(user))
+                .user(UserSummaryResponse.from(freshUser))
                 .build();
     }
 }
