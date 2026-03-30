@@ -74,6 +74,17 @@ async function apiFetch(endpoint, options = {}) {
     res = await fetch(url, { ...options, headers });
   }
 
+  // Account banned/inactive — kick out immediately
+  if (res.status === 403) {
+    const body = await res.json().catch(() => ({}));
+    const msg = (body.message || '').toLowerCase();
+    if (msg.includes('inactive') || msg.includes('disabled') || msg.includes('banned')) {
+      Auth.clear();
+      window.location.href = '/banned.html';
+      return;
+    }
+  }
+
   const data = await res.json().catch(() => ({}));
   if (!res.ok && !data.success) {
     throw { status: res.status, message: data.message || 'Lỗi hệ thống', errors: data.errors };

@@ -47,7 +47,8 @@
       "Bash(grep -l \"js/api.js\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
       "Bash(grep -rn 'api.js' c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
       "Bash(grep -l \"security.js\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
-      "Bash(./mvnw.cmd compile:*)"
+      "Bash(./mvnw.cmd compile:*)",
+      "Bash(grep -rn \"security.js\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)"
     ]
   }
 }

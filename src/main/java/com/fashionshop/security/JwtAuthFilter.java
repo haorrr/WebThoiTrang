@@ -50,7 +50,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     }
                 }
             } catch (Exception e) {
-                log.debug("Could not authenticate from JWT token: {}", e.getMessage());
+                String msg = e.getMessage();
+                if (msg != null && (msg.contains("inactive") || msg.contains("deleted"))) {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("{\"success\":false,\"message\":\"Account is inactive or disabled\"}");
+                    return;
+                }
+                log.debug("Could not authenticate from JWT token: {}", msg);
             }
         }
 
