@@ -1,6 +1,7 @@
 package com.fashionshop.dto.response;
 
 import com.fashionshop.entity.OrderItem;
+import com.fashionshop.entity.Product;
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,7 +23,16 @@ public class OrderItemResponse {
     private String imageUrl;
 
     public static OrderItemResponse from(OrderItem item) {
-        var product = item.getProduct();
+        Product product = null;
+        try {
+            product = item.getProduct();
+            if (product != null) {
+                // accessing any property forces the proxy to initialize, catching FetchNotFoundException
+                product.getName();
+            }
+        } catch (Exception e) {
+            product = null; // Entity no longer exists or was soft-deleted
+        }
         String img = null;
         String productName = "Sản phẩm không còn tồn tại";
         Long productId = null;

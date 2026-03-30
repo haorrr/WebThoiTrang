@@ -47,6 +47,9 @@ public class OrderService {
         // Validate stock for all items first
         for (CartItem item : cartItems) {
             Product product = item.getProduct();
+            if (product == null) {
+                throw new BadRequestException("Một số sản phẩm trong giỏ hàng không còn tồn tại hoặc đã ngừng kinh doanh. Vui lòng tải lại trang hoặc kiểm tra lại giỏ hàng.");
+            }
             ProductVariant variant = item.getVariant();
             int available = variant != null ? variant.getStock() : product.getStock();
             if (available < item.getQuantity()) {
