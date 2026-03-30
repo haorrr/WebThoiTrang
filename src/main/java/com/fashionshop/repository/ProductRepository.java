@@ -38,6 +38,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p.category.name, COUNT(p) FROM Product p WHERE p.deletedAt IS NULL GROUP BY p.category.name ORDER BY COUNT(p) DESC")
     List<Object[]> countByCategory();
 
+    @Query("SELECT p.category.id, COUNT(p) FROM Product p WHERE p.deletedAt IS NULL GROUP BY p.category.id")
+    List<Object[]> countByCategoryId();
+
     @Query("SELECT p FROM Product p WHERE p.deletedAt IS NULL AND p.stock <= :threshold ORDER BY p.stock ASC")
     List<Product> findLowStock(@org.springframework.data.repository.query.Param("threshold") int threshold, Pageable pageable);
 }

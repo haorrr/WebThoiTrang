@@ -84,8 +84,11 @@ async function loadCategories() {
     const res = await api.categories.list();
     if (res.success) {
       allCats = [];
-      function flatten(items, level = 0) {
-        items.forEach(c => { allCats.push({ ...c, level }); if (c.children) flatten(c.children, level + 1); });
+      function flatten(items, level = 0, parentName = null) {
+        items.forEach(c => {
+          allCats.push({ ...c, level, parentName });
+          if (c.children?.length) flatten(c.children, level + 1, c.name);
+        });
       }
       flatten(res.data || []);
       renderTable();

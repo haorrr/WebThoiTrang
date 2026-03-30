@@ -31,6 +31,10 @@ public class CategoryService {
     public List<CategoryTreeResponse> getCategoryTree() {
         List<Category> all = categoryRepository.findAllActive();
 
+        // Build product count map: categoryId → count
+        Map<Long, Long> productCounts = productRepository.countByCategoryId().stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
         // Build id → response map
         Map<Long, CategoryTreeResponse> map = all.stream()
                 .collect(Collectors.toMap(
@@ -42,6 +46,8 @@ public class CategoryService {
                                 .description(c.getDescription())
                                 .imageUrl(c.getImageUrl())
                                 .status(c.getStatus().name())
+                                .parentId(c.getParent() != null ? c.getParent().getId() : null)
+                                .productCount(productCounts.getOrDefault(c.getId(), 0L).intValue())
                                 .children(new java.util.ArrayList<>())
                                 .build()
                 ));
@@ -57,6 +63,14 @@ public class CategoryService {
                 if (parent != null) parent.getChildren().add(node);
             }
         }
+
+        // Sum children product counts into parent
+        roots.forEach(parent -> {
+            int total = parent.getProductCount() + parent.getChildren().stream()
+                    .mapToInt(CategoryTreeResponse::getProductCount).sum();
+            parent.setProductCount(total);
+        });
+
         return roots;
     }
 

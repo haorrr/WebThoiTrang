@@ -19,5 +19,7 @@ public class CategoryTreeResponse {
     private String description;
     private String imageUrl;
     private String status;
+    private Long parentId;
+    private int productCount;
     private List<CategoryTreeResponse> children;
 }

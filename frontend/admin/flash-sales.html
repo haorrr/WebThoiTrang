@@ -215,11 +215,9 @@ async function openProductModal(fsId) {
   catSel.innerHTML = '<option value="">— Chọn danh mục —</option>';
   const catRes = await api.categories.list();
   const cats = catRes.data || [];
-  // Group children under parent labels; if parent has no children, add parent as plain option
-  const parents = cats.filter(c => !c.parentId);
-  const children = cats.filter(c => c.parentId);
-  parents.forEach(p => {
-    const kids = children.filter(c => c.parentId === p.id);
+  // API returns tree: parents have children[] array
+  cats.forEach(p => {
+    const kids = p.children || [];
     if (kids.length) {
       const group = document.createElement('optgroup');
       group.label = p.name;
