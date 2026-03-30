@@ -42,7 +42,12 @@
       "Bash(grep -rn \"loyalty\\\\|điểm thưởng\\\\|loyaltyPoints\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
       "Bash(grep -n \"CacheConfig\\\\|RedisCacheManager\\\\|CacheManager\\\\|serializer\\\\|Jackson\" c:/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/config/*.java)",
       "Bash(ls c:/Users/PC/Desktop/WebThoiTrang/Dockerfile*)",
-      "Bash(grep -rn \"quick-buy.js\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html c:/Users/PC/Desktop/WebThoiTrang/src/main/resources/static/*.html)"
+      "Bash(grep -rn \"quick-buy.js\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html c:/Users/PC/Desktop/WebThoiTrang/src/main/resources/static/*.html)",
+      "Bash(ls c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
+      "Bash(grep -l \"js/api.js\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
+      "Bash(grep -rn 'api.js' c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
+      "Bash(grep -l \"security.js\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
+      "Bash(./mvnw.cmd compile:*)"
     ]
   }
 }

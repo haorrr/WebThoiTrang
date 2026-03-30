@@ -82,6 +82,24 @@
       </a>
     </div>
 
+    <!-- Security Settings -->
+    <div class="admin-card" style="margin-bottom:1.5rem">
+      <div class="admin-card__header">
+        <h2 style="display:flex;align-items:center;gap:8px">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Cài đặt bảo mật
+        </h2>
+        <span id="secSaveStatus" style="font-size:0.8rem;color:var(--color-text-muted)"></span>
+      </div>
+      <div class="admin-card__body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem" id="securitySettings">
+          <div class="skeleton" style="height:72px;border-radius:8px"></div>
+          <div class="skeleton" style="height:72px;border-radius:8px"></div>
+          <div class="skeleton" style="height:72px;border-radius:8px"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Tables Row -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
       <!-- Recent Orders -->
@@ -234,6 +252,84 @@ async function loadDashboard() {
     showToast('Không thể tải dashboard', 'error');
   }
 }
+
+// ===== Security Settings =====
+const SECURITY_KEYS = [
+  { key: 'security.disable_right_click',  label: 'Chặn chuột phải', desc: 'Ngăn người dùng mở menu chuột phải trên shop' },
+  { key: 'security.disable_devtools_key', label: 'Chặn phím tắt DevTools', desc: 'Chặn F12, Ctrl+Shift+I/J/C/U trên shop' },
+  { key: 'security.auto_ban_devtools',    label: 'Tự động vô hiệu hóa khi mở DevTools', desc: 'Ban tài khoản ngay nếu phát hiện DevTools được mở' },
+];
+
+async function loadSecuritySettings() {
+  try {
+    const res = await api.config.getAll();
+    if (!res.success) return;
+    const configs = res.data || [];
+    const map = Object.fromEntries(configs.map(c => [c.key, c.value]));
+    renderSecuritySettings(map);
+  } catch { /* ignore */ }
+}
+
+function renderSecuritySettings(map) {
+  document.getElementById('securitySettings').innerHTML = SECURITY_KEYS.map(item => {
+    const val = map[item.key];
+    const on = val === 'true';
+    const isDanger = item.key === 'security.auto_ban_devtools';
+    return `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--color-border);border-radius:10px;background:var(--color-background)">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.9rem;font-weight:600;color:var(--color-text);margin-bottom:2px">${item.label}</div>
+          <div style="font-size:0.78rem;color:var(--color-text-muted);line-height:1.4">${item.desc}</div>
+        </div>
+        <label class="toggle-switch" title="${item.label}" style="flex-shrink:0;margin-top:2px">
+          <input type="checkbox" ${on ? 'checked' : ''} onchange="saveSecuritySetting('${item.key}', this.checked)" ${isDanger ? 'data-danger="true"' : ''}>
+          <span class="toggle-track ${isDanger ? 'toggle-danger' : ''}"></span>
+        </label>
+      </div>`;
+  }).join('');
+}
+
+async function saveSecuritySetting(key, value) {
+  if (key === 'security.auto_ban_devtools' && value) {
+    if (!confirm('Bật tính năng này sẽ tự động vô hiệu hóa tài khoản khi hệ thống phát hiện DevTools. Bạn có chắc chắn không?')) {
+      // Revert the toggle
+      loadSecuritySettings();
+      return;
+    }
+  }
+  const status = document.getElementById('secSaveStatus');
+  try {
+    await api.config.update(key, String(value));
+    status.textContent = 'Đã lưu ✓';
+    status.style.color = '#16A34A';
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  } catch {
+    showToast('Không thể lưu cài đặt', 'error');
+    loadSecuritySettings(); // revert
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSecuritySettings();
+});
 </script>
+
+<style>
+.toggle-switch { position:relative; display:inline-flex; width:44px; height:24px; cursor:pointer; }
+.toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+.toggle-track {
+  position:absolute; inset:0; border-radius:12px;
+  background:#D1D5DB; transition:background 0.2s;
+}
+.toggle-track::after {
+  content:''; position:absolute; left:3px; top:3px;
+  width:18px; height:18px; border-radius:50%;
+  background:#fff; transition:transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .toggle-track { background:#1C1917; }
+.toggle-switch input:checked + .toggle-track.toggle-danger { background:#DC2626; }
+.toggle-switch input:checked + .toggle-track::after { transform:translateX(20px); }
+</style>
 </body>
 </html>

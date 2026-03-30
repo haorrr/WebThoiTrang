@@ -55,6 +55,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/flash-sales/**").permitAll()
+                // Public security config (used by frontend JS to apply security policies)
+                .requestMatchers(HttpMethod.GET, "/api/public/security-config").permitAll()
+                // Security event endpoint (auto-ban devtools detection) — auth optional
+                .requestMatchers(HttpMethod.POST, "/api/security/devtools-detected").permitAll()
                 // Swagger / Actuator
                 .requestMatchers(
                     "/swagger-ui/**", "/swagger-ui.html",

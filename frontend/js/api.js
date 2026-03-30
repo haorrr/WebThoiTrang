@@ -210,6 +210,14 @@ const api = {
     getMovements: (productId, params = {}) => apiFetch(`/admin/inventory/products/${productId}/movements?${new URLSearchParams(params)}`),
     adjust: (data) => apiFetch('/admin/inventory/adjust', { method: 'POST', body: JSON.stringify(data) }),
   },
+  config: {
+    getAll: () => apiFetch('/admin/config'),
+    update: (key, value) => apiFetch(`/admin/config/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ value }) }),
+  },
+  security: {
+    getPublicConfig: () => apiFetch('/public/security-config'),
+    reportDevtools: () => apiFetch('/security/devtools-detected', { method: 'POST' }),
+  },
 };
 
 // ===== UI HELPERS =====
