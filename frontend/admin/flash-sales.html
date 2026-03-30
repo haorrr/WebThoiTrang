@@ -79,15 +79,21 @@
 
 <!-- Product modal -->
 <div id="productModal" class="modal-overlay">
-  <div class="modal" style="max-width:600px">
+  <div class="modal" style="max-width:720px">
     <div class="modal__header">
       <h3>Thêm sản phẩm vào Flash Sale</h3>
-      <button class="modal__close" onclick="document.getElementById('productModal').classList.remove('open')">✕</button>
+      <button class="modal__close" onclick="closeProductModal()">✕</button>
     </div>
     <div class="modal__body">
       <input type="hidden" id="pmFlashId">
-      <input type="text" id="pmSearch" class="form-input" placeholder="Tìm sản phẩm..." oninput="debounceProductSearch()" style="margin-bottom:12px">
-      <div id="pmResults" style="max-height:300px;overflow-y:auto"></div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <select id="pmCategory" class="form-input" style="flex:1" onchange="loadProductsByCategory(this.value)">
+          <option value="">— Chọn danh mục —</option>
+        </select>
+        <input type="text" id="pmSearch" class="form-input" style="flex:1" placeholder="Tìm theo tên..." oninput="filterPmProducts()">
+      </div>
+      <div id="pmGrid" style="max-height:420px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+      <div id="pmEmpty" style="display:none;text-align:center;padding:2rem;color:var(--color-text-muted)">Chọn danh mục để xem sản phẩm</div>
     </div>
   </div>
 </div>
@@ -99,7 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSales();
 });
 
-let pmSearchTimer;
+let pmAllProducts = [];
+let pmAddedIds = new Set();
 
 async function loadSales() {
   const res = await api.flashSales.adminList({ page: 0, size: 50 });
@@ -192,30 +199,100 @@ async function deleteSale(id) {
   catch (e) { showToast(e.message, 'error'); }
 }
 
-function openProductModal(fsId) {
+async function openProductModal(fsId) {
   document.getElementById('pmFlashId').value = fsId;
   document.getElementById('pmSearch').value = '';
-  document.getElementById('pmResults').innerHTML = '';
+  document.getElementById('pmGrid').innerHTML = '';
+  document.getElementById('pmEmpty').style.display = '';
+  pmAllProducts = [];
+
+  // Collect already-added product ids from the current flash sale row
+  const fsRes = await api.flashSales.getById(fsId);
+  pmAddedIds = new Set((fsRes.data?.products || []).map(p => p.productId));
+
+  // Load categories
+  const catSel = document.getElementById('pmCategory');
+  catSel.innerHTML = '<option value="">— Chọn danh mục —</option>';
+  const catRes = await api.categories.list();
+  const cats = catRes.data || [];
+  // Only parent categories (no parentId) as groups, children as options
+  const parents = cats.filter(c => !c.parentId);
+  const children = cats.filter(c => c.parentId);
+  parents.forEach(p => {
+    const group = document.createElement('optgroup');
+    group.label = p.name;
+    const kids = children.filter(c => c.parentId === p.id);
+    if (kids.length) {
+      kids.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        group.appendChild(opt);
+      });
+    } else {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      group.appendChild(opt);
+    }
+    catSel.appendChild(group);
+  });
+
   document.getElementById('productModal').classList.add('open');
 }
 
-function debounceProductSearch() {
-  clearTimeout(pmSearchTimer);
-  pmSearchTimer = setTimeout(searchProducts, 400);
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
 }
 
-async function searchProducts() {
-  const q = document.getElementById('pmSearch').value.trim();
-  if (!q) return;
-  const res = await api.products.list({ keyword: q, size: 10 });
-  const products = res.data?.content || [];
-  document.getElementById('pmResults').innerHTML = products.map(p => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid var(--color-border)">
-      <img src="${p.primaryImageUrl || '../images/product-jacket.png'}" style="width:40px;height:40px;object-fit:cover;border-radius:6px">
-      <div style="flex:1"><strong>${p.name}</strong><br><small>${formatVND(p.price)}</small></div>
-      <input type="number" id="sl_${p.id}" placeholder="Giới hạn" style="width:80px;padding:4px 8px;font-size:0.8rem;border:1px solid var(--color-border);border-radius:6px">
-      <button class="btn btn-primary btn-xs" onclick="addProductToSale(${p.id})">Thêm</button>
-    </div>`).join('');
+async function loadProductsByCategory(catId) {
+  const grid = document.getElementById('pmGrid');
+  const empty = document.getElementById('pmEmpty');
+  if (!catId) { grid.innerHTML = ''; empty.style.display = ''; return; }
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--color-text-muted)">Đang tải...</div>';
+  empty.style.display = 'none';
+  const res = await api.products.list({ categoryId: catId, size: 100, status: 'ACTIVE' });
+  pmAllProducts = res.data?.content || [];
+  renderPmGrid();
+}
+
+function filterPmProducts() {
+  renderPmGrid();
+}
+
+function renderPmGrid() {
+  const q = document.getElementById('pmSearch').value.trim().toLowerCase();
+  const filtered = q ? pmAllProducts.filter(p => p.name.toLowerCase().includes(q)) : pmAllProducts;
+  const grid = document.getElementById('pmGrid');
+  const empty = document.getElementById('pmEmpty');
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    empty.textContent = 'Không có sản phẩm nào';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = filtered.map(p => {
+    const added = pmAddedIds.has(p.id);
+    const img = p.primaryImageUrl || '../images/product-jacket.png';
+    const price = p.salePrice || p.price;
+    return `
+    <div style="display:flex;flex-direction:column;border:1px solid var(--color-border);border-radius:10px;overflow:hidden;${added ? 'opacity:0.6' : ''}">
+      <img src="${img}" alt="${p.name}" style="width:100%;height:130px;object-fit:cover">
+      <div style="padding:10px;flex:1;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:0.85rem;font-weight:600;line-height:1.3">${p.name}</div>
+        <div style="font-size:0.8rem;color:var(--color-primary);font-weight:600">${formatVND(price)}</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:auto">
+          <input type="number" id="sl_${p.id}" placeholder="Giới hạn SL" min="1"
+            style="flex:1;padding:4px 8px;font-size:0.75rem;border:1px solid var(--color-border);border-radius:6px;min-width:0"
+            ${added ? 'disabled' : ''}>
+          <button class="btn btn-${added ? 'outline' : 'primary'} btn-xs" onclick="addProductToSale(${p.id})" ${added ? 'disabled' : ''}>
+            ${added ? '✓ Đã thêm' : '+ Thêm'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 async function addProductToSale(productId) {
@@ -225,7 +302,8 @@ async function addProductToSale(productId) {
   try {
     await api.flashSales.addProduct(fsId, productId, stockLimit);
     showToast('Đã thêm sản phẩm');
-    document.getElementById('productModal').classList.remove('open');
+    pmAddedIds.add(productId);
+    renderPmGrid();
     loadSales();
   } catch (e) { showToast(e.message, 'error'); }
 }
