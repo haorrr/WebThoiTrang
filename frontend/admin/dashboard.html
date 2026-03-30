@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('sidebarUserName').textContent = user?.name || 'Admin';
   document.getElementById('lastUpdated').textContent = `Cập nhật: ${new Date().toLocaleTimeString('vi-VN')}`;
   loadDashboard();
+  loadSecuritySettings();
 });
 
 async function loadDashboard() {
@@ -261,13 +262,19 @@ const SECURITY_KEYS = [
 ];
 
 async function loadSecuritySettings() {
+  const defaults = {
+    'security.disable_right_click':  'true',
+    'security.disable_devtools_key': 'true',
+    'security.auto_ban_devtools':    'false',
+  };
   try {
     const res = await api.config.getAll();
-    if (!res.success) return;
-    const configs = res.data || [];
-    const map = Object.fromEntries(configs.map(c => [c.key, c.value]));
+    const configs = (res.success && res.data) ? res.data : [];
+    const map = { ...defaults, ...Object.fromEntries(configs.map(c => [c.key, c.value])) };
     renderSecuritySettings(map);
-  } catch { /* ignore */ }
+  } catch {
+    renderSecuritySettings(defaults);
+  }
 }
 
 function renderSecuritySettings(map) {
@@ -309,9 +316,6 @@ async function saveSecuritySetting(key, value) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadSecuritySettings();
-});
 </script>
 
 <style>
