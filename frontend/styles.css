@@ -1,5 +1,5 @@
 /* ===== DESIGN SYSTEM TOKENS ===== */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Work+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   /* Colors — E-commerce Luxury */
@@ -16,8 +16,8 @@
   --color-overlay: rgba(28, 25, 23, 0.6);
 
   /* Typography */
-  --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Work Sans', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Inter', sans-serif;
 
   /* Spacing */
   --space-xs: 0.25rem;

@@ -162,11 +162,18 @@
 
   window.qbAddToCart = async function () {
     if (!Auth.isLoggedIn()) { window.location.href = '/login.html'; return; }
+
+    const variants = currentProduct?.variants || [];
+    const uniqueSizes = [...new Set(variants.map(v => v.size).filter(Boolean))];
+    const uniqueColors = [...new Set(variants.map(v => v.color).filter(Boolean))];
+    const size = document.querySelector('.qb-size-btn.active')?.dataset.size;
+    const color = document.querySelector('.qb-color-btn.active')?.dataset.color;
+    if (uniqueSizes.length > 0 && !size) { showToast('Vui lòng chọn kích thước', 'error'); return; }
+    if (uniqueColors.length > 0 && !color) { showToast('Vui lòng chọn màu sắc', 'error'); return; }
+
     const btn = document.getElementById('qb-add-btn');
     setLoading(btn, true);
     try {
-      const size = document.querySelector('.qb-size-btn.active')?.dataset.size;
-      const color = document.querySelector('.qb-color-btn.active')?.dataset.color;
       await api.cart.addItem(currentProduct.id, qty, size, color, selectedVariantId);
       showToast('Đã thêm vào giỏ hàng!');
       updateCartCount();
