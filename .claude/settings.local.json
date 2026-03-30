@@ -38,7 +38,10 @@
       "Bash(\"/c/Users/PC/Desktop/WebThoiTrang/plans/bug-analysis/reports/scout-report.md\")",
       "Bash(\"/c/Users/PC/Desktop/WebThoiTrang/plans/bug-analysis/reports/bug-files-summary.txt\":*)",
       "Bash(\"/c/Users/PC/Desktop/WebThoiTrang/plans/bug-analysis/reports/detailed-code-snippets.txt\":*)",
-      "Bash(grep -n \"TZ\\\\|timezone\\\\|JAVA_OPTS\\\\|environment\" c:/Users/PC/Desktop/WebThoiTrang/docker-compose*.yml)"
+      "Bash(grep -n \"TZ\\\\|timezone\\\\|JAVA_OPTS\\\\|environment\" c:/Users/PC/Desktop/WebThoiTrang/docker-compose*.yml)",
+      "Bash(grep -rn \"loyalty\\\\|điểm thưởng\\\\|loyaltyPoints\" c:/Users/PC/Desktop/WebThoiTrang/frontend/*.html)",
+      "Bash(grep -n \"CacheConfig\\\\|RedisCacheManager\\\\|CacheManager\\\\|serializer\\\\|Jackson\" c:/Users/PC/Desktop/WebThoiTrang/src/main/java/com/fashionshop/config/*.java)",
+      "Bash(ls c:/Users/PC/Desktop/WebThoiTrang/Dockerfile*)"
     ]
   }
 }

@@ -190,14 +190,14 @@ function renderCart() {
               oninput="applyLoyaltyPoints()" value="${pointsToRedeem || ''}">
             <button class="btn btn-sm" style="background:#CA8A04;color:#fff;border:none;white-space:nowrap" onclick="useAllPoints()">Dùng tất cả</button>
           </div>
-          ${pointsToRedeem > 0 ? `<div style="font-size:0.78rem;color:#16A34A;margin-top:6px">✓ Giảm ${formatVND(pointsToRedeem * vndPerPoint)} từ điểm thưởng</div>` : ''}
+          <div id="loyaltyFeedback" style="font-size:0.78rem;color:#16A34A;margin-top:6px">${pointsToRedeem > 0 ? `✓ Giảm ${formatVND(Math.min(pointsToRedeem * vndPerPoint, subtotal - discountAmount))} từ điểm thưởng` : ''}</div>
         </div>` : ''}
 
         <div class="summary-row"><span>Tạm tính</span><span>${formatVND(subtotal)}</span></div>
         ${discountAmount > 0 ? `<div class="summary-row discount"><span>Giảm giá (${appliedCoupon?.code})</span><span>-${formatVND(discountAmount)}</span></div>` : ''}
-        ${pointsToRedeem > 0 ? `<div class="summary-row discount"><span>Điểm thưởng (${pointsToRedeem} điểm)</span><span>-${formatVND(pointsToRedeem * vndPerPoint)}</span></div>` : ''}
+        <div id="loyaltyRow" class="summary-row discount" style="${pointsToRedeem > 0 ? '' : 'display:none'}"><span>Điểm thưởng (<span id="loyaltyRowPts">${pointsToRedeem}</span> điểm)</span><span>-<span id="loyaltyRowAmt">${formatVND(Math.min(pointsToRedeem * vndPerPoint, subtotal - discountAmount))}</span></span></div>
         <div class="summary-row"><span>Phí vận chuyển</span><span style="color:#16A34A;font-weight:600">Miễn phí</span></div>
-        <div class="summary-row total"><span>Tổng cộng</span><span style="color:var(--color-cta)">${formatVND(finalAmount)}</span></div>
+        <div class="summary-row total"><span>Tổng cộng</span><span style="color:var(--color-cta)" id="cartTotal">${formatVND(finalAmount)}</span></div>
         <button class="btn btn-primary" style="width:100%;margin-top:1rem" onclick="openCheckout()">Đặt hàng ngay</button>
         <a href="products.html" class="btn btn-outline" style="width:100%;margin-top:0.5rem;text-align:center;display:flex;justify-content:center">Tiếp tục mua sắm</a>
       </div>
@@ -237,7 +237,25 @@ function applyLoyaltyPoints() {
   const input = document.getElementById('loyaltyInput');
   const val = parseInt(input.value) || 0;
   pointsToRedeem = Math.max(0, Math.min(val, loyaltyPointsAvailable));
-  renderCart();
+
+  const subtotal = cartData?.subtotal || 0;
+  const loyaltyDiscount = Math.min(pointsToRedeem * vndPerPoint, subtotal - discountAmount);
+  const finalAmount = Math.max(0, subtotal - discountAmount - loyaltyDiscount);
+
+  const feedback = document.getElementById('loyaltyFeedback');
+  if (feedback) feedback.textContent = pointsToRedeem > 0 ? `✓ Giảm ${formatVND(loyaltyDiscount)} từ điểm thưởng` : '';
+
+  const row = document.getElementById('loyaltyRow');
+  if (row) {
+    row.style.display = pointsToRedeem > 0 ? '' : 'none';
+    const pts = document.getElementById('loyaltyRowPts');
+    const amt = document.getElementById('loyaltyRowAmt');
+    if (pts) pts.textContent = pointsToRedeem;
+    if (amt) amt.textContent = formatVND(loyaltyDiscount);
+  }
+
+  const total = document.getElementById('cartTotal');
+  if (total) total.textContent = formatVND(finalAmount);
 }
 
 function useAllPoints() {
