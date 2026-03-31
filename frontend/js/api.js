@@ -167,7 +167,7 @@ const api = {
     update: (id, data) => apiFetch(`/reviews/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id) => apiFetch(`/reviews/${id}`, { method: 'DELETE' }),
     adminList: (params = {}) => apiFetch(`/reviews/admin/all?${new URLSearchParams(params)}`),
-    adminModerate: (id, status) => apiFetch(`/reviews/admin/${id}/moderate`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    adminModerate: (id, status) => apiFetch(`/reviews/admin/${id}/moderate?status=${status}`, { method: 'PATCH' }),
   },
   coupons: {
     validate: (code, orderAmount) => apiFetch('/coupons/validate', { method: 'POST', body: JSON.stringify({ code, orderAmount }) }),
