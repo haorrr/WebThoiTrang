@@ -131,10 +131,12 @@ public class ReviewService {
     @Transactional
     public ReviewResponse moderateReview(Long reviewId, String status) {
         Review review = reviewRepository.findById(reviewId)
-                .filter(r -> !r.isDeleted())
                 .orElseThrow(() -> new ResourceNotFoundException("Review", reviewId));
 
         review.setStatus(Review.Status.valueOf(status.toUpperCase()));
-        return ReviewResponse.from(reviewRepository.save(review));
+        reviewRepository.save(review);
+        // Re-fetch to ensure lazy collections (user, product, images) are loaded
+        return ReviewResponse.from(reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", reviewId)));
     }
 }
