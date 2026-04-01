@@ -11,28 +11,26 @@
     } catch { return false; }
   }
 
-  // Flags — block by default, updated by server config
   let rightClickBlocked  = true;
   let devtoolsKeyBlocked = true;
   let autoBanEnabled     = false;
   let banReported        = false;
+  let overlay            = null;
+  let devtoolsOpen       = false;
 
-  // ── Overlay (shown when DevTools detected) ─────────────────────────────────
-  let overlay = null;
-
+  // ── Overlay ─────────────────────────────────────────────────────────────────
   function showDevtoolsOverlay() {
     if (overlay) return;
     overlay = document.createElement('div');
     overlay.id = '__sec_overlay';
     overlay.style.cssText = [
-      'position:fixed', 'inset:0', 'z-index:2147483647',
+      'position:fixed','inset:0','z-index:2147483647',
       'background:rgba(12,10,9,0.97)',
-      'display:flex', 'flex-direction:column',
-      'align-items:center', 'justify-content:center',
-      'font-family:Inter,sans-serif', 'color:#fff',
+      'display:flex','flex-direction:column',
+      'align-items:center','justify-content:center',
+      'font-family:Inter,sans-serif','color:#fff',
       'user-select:none',
     ].join(';');
-
     overlay.innerHTML = `
       <div style="text-align:center;padding:2rem;max-width:420px">
         <div style="width:72px;height:72px;background:#7F1D1D;border-radius:50%;
@@ -56,9 +54,7 @@
           MAISON. SECURITY
         </div>
       </div>`;
-
     document.body.appendChild(overlay);
-    // Prevent scrolling behind overlay
     document.documentElement.style.overflow = 'hidden';
   }
 
@@ -69,27 +65,56 @@
     document.documentElement.style.overflow = '';
   }
 
-  // ── DevTools detection (size heuristic + debugger trick) ───────────────────
-  let devtoolsOpen = false;
-
-  function checkDevtools() {
-    if (isAdmin()) return;
+  // ── Detection method 1: window size (docked DevTools) ───────────────────────
+  function checkBySize() {
     const THRESHOLD = 160;
-    const bySize =
-      (window.outerWidth  - window.innerWidth  > THRESHOLD) ||
-      (window.outerHeight - window.innerHeight > THRESHOLD);
+    return (window.outerWidth  - window.innerWidth  > THRESHOLD) ||
+           (window.outerHeight - window.innerHeight > THRESHOLD);
+  }
 
-    if (bySize && !devtoolsOpen) {
+  // ── Detection method 2: console timing trick (docked + undocked) ────────────
+  // When DevTools is open, iterating a large object in console takes longer.
+  let _dtByConsole = false;
+  (function consoleLoop() {
+    const start = performance.now();
+    // eslint-disable-next-line no-console
+    console.log('%c', { toString() { _dtByConsole = true; return ''; } });
+    const elapsed = performance.now() - start;
+    if (elapsed > 10) _dtByConsole = true;
+    setTimeout(consoleLoop, 1000);
+  })();
+
+  // ── Detection method 3: debugger timing ─────────────────────────────────────
+  let _dtByDebugger = false;
+  function checkByDebugger() {
+    const start = performance.now();
+    // The `debugger` statement pauses execution only when DevTools is open
+    // eslint-disable-next-line no-debugger
+    debugger;
+    if (performance.now() - start > 100) _dtByDebugger = true;
+    else _dtByDebugger = false;
+  }
+
+  // ── Master check ────────────────────────────────────────────────────────────
+  function checkDevtools() {
+    if (isAdmin()) {
+      if (devtoolsOpen) { devtoolsOpen = false; hideDevtoolsOverlay(); }
+      return;
+    }
+    checkByDebugger();
+    const nowOpen = checkBySize() || _dtByConsole || _dtByDebugger;
+    if (nowOpen && !devtoolsOpen) {
       devtoolsOpen = true;
       showDevtoolsOverlay();
       if (autoBanEnabled) reportBan();
-    } else if (!bySize && devtoolsOpen) {
+    } else if (!nowOpen && devtoolsOpen) {
       devtoolsOpen = false;
+      _dtByConsole = false;
       hideDevtoolsOverlay();
     }
   }
 
-  // ── Auto-ban (logged-in users only) ────────────────────────────────────────
+  // ── Auto-ban ─────────────────────────────────────────────────────────────────
   async function reportBan() {
     if (banReported) return;
     banReported = true;
@@ -112,14 +137,14 @@
     } catch { banReported = false; }
   }
 
-  // ── Right-click block ───────────────────────────────────────────────────────
+  // ── Right-click block ────────────────────────────────────────────────────────
   document.addEventListener('contextmenu', function (e) {
     if (!rightClickBlocked || isAdmin()) return;
     e.preventDefault();
     e.stopPropagation();
   }, true);
 
-  // ── Keyboard block ──────────────────────────────────────────────────────────
+  // ── Keyboard block ───────────────────────────────────────────────────────────
   document.addEventListener('keydown', function (e) {
     if (!devtoolsKeyBlocked || isAdmin()) return;
     const ctrl = e.ctrlKey || e.metaKey;
@@ -133,11 +158,13 @@
     }
   }, true);
 
-  // ── Start detection loop ────────────────────────────────────────────────────
+  // ── Run detection ────────────────────────────────────────────────────────────
   setInterval(checkDevtools, 800);
   window.addEventListener('resize', checkDevtools);
+  // Run once immediately after page load
+  window.addEventListener('load', checkDevtools);
 
-  // ── Load server config (update flags, keep defaults until loaded) ───────────
+  // ── Load server config ───────────────────────────────────────────────────────
   async function loadConfig() {
     try {
       const base = window.location.hostname === 'localhost'

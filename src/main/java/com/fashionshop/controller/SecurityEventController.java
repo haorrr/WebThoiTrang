@@ -29,15 +29,23 @@ public class SecurityEventController {
     @GetMapping("/api/public/security-config")
     @Operation(summary = "Get public security settings")
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> getSecurityConfig() {
-        boolean disableRightClick = getBool("security.disable_right_click", true);
-        boolean disableDevtoolsKey = getBool("security.disable_devtools_key", true);
-        boolean autoBanDevtools   = getBool("security.auto_ban_devtools", false);
-
-        return ResponseEntity.ok(ApiResponse.ok(Map.of(
-                "disableRightClick",  disableRightClick,
-                "disableDevtoolsKey", disableDevtoolsKey,
-                "autoBanDevtools",    autoBanDevtools
-        )));
+        try {
+            boolean disableRightClick  = getBool("security.disable_right_click",  true);
+            boolean disableDevtoolsKey = getBool("security.disable_devtools_key", true);
+            boolean autoBanDevtools    = getBool("security.auto_ban_devtools",     false);
+            return ResponseEntity.ok(ApiResponse.ok(Map.of(
+                    "disableRightClick",  disableRightClick,
+                    "disableDevtoolsKey", disableDevtoolsKey,
+                    "autoBanDevtools",    autoBanDevtools
+            )));
+        } catch (Exception e) {
+            // Fallback: return safe defaults if DB is unavailable
+            return ResponseEntity.ok(ApiResponse.ok(Map.of(
+                    "disableRightClick",  true,
+                    "disableDevtoolsKey", true,
+                    "autoBanDevtools",    false
+            )));
+        }
     }
 
     /**
