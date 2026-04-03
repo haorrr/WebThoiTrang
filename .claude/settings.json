@@ -14,7 +14,15 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:smattme.com)",
       "Bash(ls d:/Desktop/WebThoiTrang/*.xml d:/Desktop/WebThoiTrang/mvnw*)",
-      "Bash(ls d:/Desktop/WebThoiTrang/gradlew*)"
+      "Bash(ls d:/Desktop/WebThoiTrang/gradlew*)",
+      "Bash(/d/Desktop/WebThoiTrang/docs/README_TOXIC_DETECTION.md:*)",
+      "Bash(ls -lh /d/Desktop/WebThoiTrang/docs/*toxic* /d/Desktop/WebThoiTrang/docs/MODEL_COMPARISON.md)",
+      "Read(//d/Desktop/WebThoiTrang/**)",
+      "Bash(wc -l /d/Desktop/WebThoiTrang/docs/*toxic* /d/Desktop/WebThoiTrang/docs/MODEL_COMPARISON.md /d/Desktop/WebThoiTrang/docs/README_TOXIC_DETECTION.md)",
+      "Bash(bash -c 'date +%H%M')",
+      "Bash(grep -rn \"forgotPassword\\\\|forgot-password\\\\|resetPassword\" d:/Desktop/WebThoiTrang/frontend/*.html)",
+      "Bash(find d:/Desktop/WebThoiTrang/src -name GlobalExceptionHandler.java -o -name *ExceptionHandler*)",
+      "Bash(grep -n \"searchInput\\\\|search-input\\\\|navbar.*input\\\\|input.*search\" d:/Desktop/WebThoiTrang/frontend/*.html)"
     ]
   }
 }
