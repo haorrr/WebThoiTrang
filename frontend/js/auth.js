@@ -27,6 +27,7 @@ const auth = {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
   },
   async logout() {
     try { await authApi.logout(); } catch (_) {}

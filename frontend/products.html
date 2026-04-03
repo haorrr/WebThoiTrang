@@ -285,7 +285,7 @@ async function loadProducts() {
   const params = {
     page: currentPage, size: 12,
     sort: sort[0], dir: sort[1],
-    keyword: document.getElementById('searchInput').value.trim() || undefined,
+    search: document.getElementById('searchInput').value.trim() || undefined,
     minPrice: document.getElementById('minPrice').value || undefined,
     maxPrice: document.getElementById('maxPrice').value || undefined,
   };
@@ -299,7 +299,21 @@ async function loadProducts() {
   try {
     const res = await api.products.list(params);
     if (res.success && res.data) {
-      const { content = [], totalElements = 0, totalPages = 0 } = res.data;
+      let { content = [], totalElements = 0, totalPages = 0 } = res.data;
+      // Client-side sort for effective price and Vietnamese name
+      if (sort[0] === 'price') {
+        const dir = sort[1] === 'asc' ? 1 : -1;
+        content = [...content].sort((a, b) => {
+          const pa = a.flashPrice || a.salePrice || a.price || 0;
+          const pb = b.flashPrice || b.salePrice || b.price || 0;
+          return (pa - pb) * dir;
+        });
+      } else if (sort[0] === 'name') {
+        const dir = sort[1] === 'asc' ? 1 : -1;
+        content = [...content].sort((a, b) =>
+          (a.name || '').localeCompare(b.name || '', 'vi', { sensitivity: 'base' }) * dir
+        );
+      }
       document.getElementById('resultsCount').textContent = `${totalElements} sản phẩm`;
       if (content.length === 0) {
         grid.innerHTML = `
