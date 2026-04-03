@@ -323,7 +323,7 @@
       const grid = document.getElementById('homeProductsGrid');
       try {
         // Fetch latest 4 active products
-        const res = await api.products.list({ page: 0, size: 4, sortBy: 'createdAt', sortDir: 'desc', status: 'ACTIVE' });
+        const res = await api.products.list({ page: 0, size: 4, sort: 'createdAt', dir: 'desc', status: 'ACTIVE' });
         if (res.success && res.data) {
           const products = res.data.content || [];
           if (products.length > 0) {

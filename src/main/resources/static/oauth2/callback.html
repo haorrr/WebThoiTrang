@@ -27,6 +27,7 @@
     document.querySelector('p').textContent = 'Đăng nhập thất bại. Đang chuyển hướng...';
     setTimeout(() => window.location.href = '../login.html', 2000);
   } else {
+    Auth.clear();
     Auth.save(accessToken, refreshToken, null);
     // Fetch user info then redirect
     api.users.me().then(res => {
