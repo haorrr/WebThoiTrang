@@ -1,0 +1,34 @@
+=== KẾT QUẢ TEST CÁC CHỨC NĂNG (TÌM KIẾM, CHI TIẾT, ĐIỀU HƯỚNG, FLASH SALE) ===
+
+
+--- THỰC HIỆN ĐĂNG NHẬP (Tiền đề cho các test sau) ---
+-> Đăng nhập thành công với tk2@gmail.com
+
+--- BẮT ĐẦU TEST TÌM KIẾM SẢN PHẨM ---
+1. Tìm kiếm 'áo'
+-> Tìm được 12 kết quả (PASS)
+2. Tìm kiếm 'abcxyz123'
+-> Hiển thị: Không tìm thấy sản phẩm (PASS)
+3. Tìm kiếm '@#$%'
+-> Test Tìm kiếm hoàn tất
+
+--- BẮT ĐẦU TEST CHI TIẾT SẢN PHẨM ---
+1. Chuyển sang trang Chi Tiết Sản Phẩm
+2. Chọn kích thước
+3. Chọn màu sắc
+4. Thêm vào giỏ hàng
+-> Test Chi tiết sản phẩm hoàn tất (PASS)
+
+--- BẮT ĐẦU TEST FLASH SALE ---
+1. Mở trang Flash Sale ID=10
+2. Mở Quick View cho Flash Sale
+-> Test Flash Sale hoàn tất (PASS)
+
+--- BẮT ĐẦU TEST ĐIỀU HƯỚNG ---
+1. Chuyển sang phần Bộ Sưu Tập (Cửa hàng)
+2. Chuyển sang Giỏ hàng
+3. Sử dụng Back của trình duyệt
+4. Nhấp Logo để về trang chủ
+-> Kiểm tra điều hướng hoàn tất (PASS)
+
+Đã chạy xong toàn bộ kịch bản. Đóng trình duyệt sau 5s...

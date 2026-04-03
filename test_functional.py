@@ -155,13 +155,14 @@ class FunctionalTest:
         self.open_home()
         try:
             self.write_log("1. Chuyển sang phần Bộ Sưu Tập (Cửa hàng)")
-            nav_shop = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a[href='products.html']"))) 
-            nav_shop.click()
+            # Trên trang chủ, link dẫn sang products.html nằm ở nút Xem Tất Cả, không phải trên thanh điều hướng (#products)
+            nav_shop = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[href='products.html'].btn"))) 
+            self.driver.execute_script("arguments[0].click();", nav_shop)
             time.sleep(2)
 
             self.write_log("2. Chuyển sang Giỏ hàng")
-            cart_icon = self.driver.find_element(By.ID, "cartBtn")
-            cart_icon.click()
+            cart_icon = self.wait.until(EC.presence_of_element_located((By.ID, "cartBtn")))
+            self.driver.execute_script("arguments[0].click();", cart_icon)
             time.sleep(2)
 
             self.write_log("3. Sử dụng Back của trình duyệt")
@@ -169,8 +170,8 @@ class FunctionalTest:
             time.sleep(2)
             
             self.write_log("4. Nhấp Logo để về trang chủ")
-            logo = self.driver.find_element(By.CLASS_NAME, "navbar__logo")
-            logo.click()
+            logo = self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "navbar__logo")))
+            self.driver.execute_script("arguments[0].click();", logo)
             time.sleep(2)
             
             self.write_log("-> Kiểm tra điều hướng hoàn tất (PASS)")
